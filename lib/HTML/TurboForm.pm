@@ -8,7 +8,7 @@ use warnings;
 use UNIVERSAL::require;
 use YAML::Syck;
 
-our $VERSION='0.01';
+our $VERSION='0.02';
 
 sub new{
   my ($class, $r)=@_;
@@ -171,38 +171,40 @@ to start with, two simple examples of how to use turboform. I am still working o
 
 =head2 Usage variant 1 : via objects and methods
 
- my $form= new HTML::TurboForm($c->req->params);
- my $options={}; 
- $options->{ 'label1' }='1';
- $options->{ 'label2' }='2';
- $options->{ 'label3' }='3';
- $form->addelement({ type => 'html', text =>'<center>'  });
- $form->addelement({ type => 'text',     name => 'texttest',     label => 'element1' } );
- $form->addelement({ type => 'text',     name => 'texttest2',     label => 'vergleichselement' } );
- $form->addelement({ type => 'textarea', name => 'textareatest', label => 'Areahalt:' } );
- $form->addelement({ type => 'submit',   name => 'freeze',       label => ' ',            value=>'einfrieren' } );
- $form->addelement({ type => 'submit',   name => 'unfreeze',     label => ' ',            value=>'normal' } );
- $form->addelement({ type => 'checkbox', name => 'boxtest',      label => 'auswählen',   
-                  options => $options, params =>{ 'listmode' } } );
- $form->addelement({ type => 'html', text =>'<hr>'  });
- $form->addelement({ type => 'select',   name => 'selecttest',   label => 'selectieren', 
-                  options => $options } );
- $form->addelement({ type => 'select',   name => 'selecttest2',  label => 'selectieren', 
-                  options => $options,    attributes => { 'multiple' , 'size'=>'3' } } );
- $form->addelement({ type => 'text',     name => 'mailtest',    label => 'E-Mail' } );
- $form->addelement({ type => 'radio',    name => 'tadiotest',    label => 'radioteile', 
-                  options => $options, params =>{ 'listmode', 'norow'} } );
- $form->addelement({ type => 'date',     name => 'datetest',    label => 'Datum', 
-                    params=>{ startyear=> '2000' , endyear => '2020' } } );
- $form->addconstraint({ type=> 'equation', name=> 'texttest', text=> 'kein Vergleich', 
-                      params=>{ operator => 'eq', comp=>$form->getValue('texttest2') } });
- $form->addconstraint({ type=> 'required', name=> 'boxtest', text=> 'du musst schon was auswählen' });
- $form->addconstraint({ type=> 'date',     name=> 'datetest', text=> 'das ist doch kein datum' });
- $form->addconstraint({ type=> 'email',    name=> 'mailtest', text=> 'ungültige Mailadresse' });
- $form->addelement({ type => 'html', text =>'</center>'  });
- my $text=$form->render();
-
- if ($form->submitted eq 'freeze') {}
+    my $form= new HTML::TurboForm($c->req->params);
+    my $options={}; 
+    $options->{ 'label1' }='1';
+    $options->{ 'label2' }='2';
+    $options->{ 'label3' }='3';
+    $form->add_element({ type => 'Html', text =>'<center>'  });
+    $form->add_element({ type => 'Text',     name => 'texttest',     label => 'element1' } );
+    $form->add_element({ type => 'Text',     name => 'texttest2',     label => 'vergleichselement' } );
+    $form->add_element({ type => 'Textarea', name => 'textareatest', label => 'Areahalt:' } );
+    $form->add_element({ type => 'Submit',   name => 'freeze',       label => ' ',            value=>'einfrieren' } );
+    $form->add_element({ type => 'Submit',   name => 'unfreeze',     label => ' ',            value=>'normal' } );
+    $form->add_element({ type => 'Checkbox', name => 'boxtest',      label => 'auswählen',   
+                                                                    options => $options, params =>{ 'listmode' } } );
+    $form->add_element({ type => 'Html', text =>'<hr>'  });
+    $form->add_element({ type => 'Select',   name => 'selecttest',   label => 'selectieren', options => $options } );
+    $form->add_element({ type => 'Select',   name => 'selecttest2',  label => 'selectieren', 
+                                          options => $options,    attributes => { 'multiple' , 'size'=>'3' } } );
+    $form->add_element({ type => 'Text',     name => 'mailtest',    label => 'E-Mail' } );
+    $form->add_element({ type => 'Radio',    name => 'tadiotest',    label => 'radioteile', 
+                                          options => $options, params =>{ 'listmode', 'norow'} } );
+    $form->add_element({ type => 'Date',     name => 'datetest',    label => 'Datum', params=>{ startyear=> '2000' , endyear => '2020' } } );
+    $form->add_constraint({ type=> 'Equation', name=> 'texttest', text=> 'kein Vergleich', 
+                                            params=>{ operator => 'eq', comp=>$form->get_value('texttest2') } });
+    $form->add_constraint({ type=> 'Required', name=> 'boxtest', text=> 'du musst schon was auswählen' });
+    $form->add_constraint({ type=> 'Date',     name=> 'datetest', text=> 'das ist doch kein datum' });
+    $form->add_constraint({ type=> 'Email',    name=> 'mailtest', text=> 'ungültige Mailadresse' });
+    $form->add_element({ type => 'Html', text =>'</center>'  });
+    $form->freeze_all() if ($form->submitted() eq 'freeze');
+    $c->stash->{form} = $form->render();
+    $c->stash->{template}='formtest/formtest.tt';
+    if ($form->submitted() eq 'freeze') {
+       my @cols= ('txt1','date','txt2','checkboxtest');
+       my $data=$form->map_value(@cols); 
+    }
 
 =head2 Usage Variant 2 : via yml file:
 
