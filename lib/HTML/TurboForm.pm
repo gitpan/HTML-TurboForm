@@ -8,7 +8,7 @@ use warnings;
 use UNIVERSAL::require;
 use YAML::Syck;
 
-our $VERSION='0.02';
+our $VERSION='0.03';
 
 sub new{
   my ($class, $r)=@_;
@@ -29,8 +29,14 @@ sub add_constraint{
   $params->{request}=$self->{request};
   my $class_name = "HTML::TurboForm::Constraint::" . $params->{ type };
   $class_name->require() or die "Constraint Class '" . $class_name . "' does not exist: $@";  
-  my $new_len =  push(@ { $self->{constraints} }, $class_name->new($params));
+  push(@ { $self->{constraints} }, $class_name->new($params));
 }
+
+sub add_uploads{
+  my ($self, $uploads) = @_;  
+  $self->{uploads} = $uploads;
+}
+
 
 sub load{
     my ($self,$fn)=@_;
@@ -62,7 +68,8 @@ sub add_element{
   my $name= $params->{name};
   my $class_name = "HTML::TurboForm::Element::" . $params->{ type };
   $class_name->require() or die "Class '" . $class_name . "' does not exist: $@";  
-  my $new_len =  push(@ { $self->{element} }, $class_name->new($params));
+  my $element= $class_name->new($params,$self->{uploads}->{$name.'_upload'});
+  my $new_len =  push(@ { $self->{element} },  $element);
 
   if ($params->{type} eq 'Submit') {
     if ( exists $self->{request}->{$name } ){
@@ -70,6 +77,7 @@ sub add_element{
       $self->{submit_value} = $name;
     }
   }
+
   $self->{element_index}->{$name}->{index}=$new_len-1;
   $self->{element_index}->{$name}->{frozen}=0;  
   $self->{element_index}->{$name}->{error_message}='';  
@@ -78,7 +86,7 @@ sub add_element{
 sub render{
   my ($self)=@_;
 
-  my $result='<form method=post>';
+  my $result='<form method=post enctype="multipart/form-data">';
   foreach my $item(@{$self->{element}}) {
     my $name = $item->name;
     $result .= $item->render($self->{element_index}->{$name});
@@ -117,8 +125,7 @@ sub freeze{
 sub freeze_all{
   my ($self)=@_;
   my $k;
-  my $v;
-  
+  my $v;  
   foreach $k(keys %{ $self->{element_index} } ){    
     $self->{element_index}->{$k}->{frozen}=1;
   } 
@@ -171,8 +178,7 @@ to start with, two simple examples of how to use turboform. I am still working o
 
 =head2 Usage variant 1 : via objects and methods
 
-    my $form= new HTML::TurboForm($c->req->params);
-    my $options={}; 
+ my $options; 
     $options->{ 'label1' }='1';
     $options->{ 'label2' }='2';
     $options->{ 'label3' }='3';
@@ -182,18 +188,18 @@ to start with, two simple examples of how to use turboform. I am still working o
     $form->add_element({ type => 'Textarea', name => 'textareatest', label => 'Areahalt:' } );
     $form->add_element({ type => 'Submit',   name => 'freeze',       label => ' ',            value=>'einfrieren' } );
     $form->add_element({ type => 'Submit',   name => 'unfreeze',     label => ' ',            value=>'normal' } );
-    $form->add_element({ type => 'Checkbox', name => 'boxtest',      label => 'auswählen',   
-                                                                    options => $options, params =>{ 'listmode' } } );
+    $form->add_element({ type => 'Checkbox', name => 'boxtest',      label => 'auswählen',   options =>  $options, params =>{ 'listmode'=>'' } } );
     $form->add_element({ type => 'Html', text =>'<hr>'  });
-    $form->add_element({ type => 'Select',   name => 'selecttest',   label => 'selectieren', options => $options } );
-    $form->add_element({ type => 'Select',   name => 'selecttest2',  label => 'selectieren', 
-                                          options => $options,    attributes => { 'multiple' , 'size'=>'3' } } );
+    $form->add_element({ type => 'Select',   name => 'selecttest',   label => 'selectieren', options =>  $options } );
+    $form->add_element({ type => 'Select',   name => 'selecttest2',  label => 'selectieren', options => $options,  attributes => { 'multiple'=>'' , 'size'=>'3' } } );
     $form->add_element({ type => 'Text',     name => 'mailtest',    label => 'E-Mail' } );
-    $form->add_element({ type => 'Radio',    name => 'tadiotest',    label => 'radioteile', 
-                                          options => $options, params =>{ 'listmode', 'norow'} } );
+    $form->add_element({ type => 'Radio',    name => 'tadiotest',    label => 'radioteile', options => $options, params =>{ 'listmode', 'norow'} } );
     $form->add_element({ type => 'Date',     name => 'datetest',    label => 'Datum', params=>{ startyear=> '2000' , endyear => '2020' } } );
-    $form->add_constraint({ type=> 'Equation', name=> 'texttest', text=> 'kein Vergleich', 
-                                            params=>{ operator => 'eq', comp=>$form->get_value('texttest2') } });
+    $form->add_element({ type => 'Image',     name => 'imagetest',    label => 'Bild', width=>'400', height=>'300', 
+                       thumbnail => { width => '60', height=>'80' }, 
+                       savedir=>'/home/whocares/catalyst/formproject/root/static/images/temp', 
+                       loadurl=>'/static/images/temp' } );
+    $form->add_constraint({ type=> 'Equation', name=> 'texttest', text=> 'kein Vergleich', params=>{ operator => 'eq', comp=>$form->get_value('texttest2') } });
     $form->add_constraint({ type=> 'Required', name=> 'boxtest', text=> 'du musst schon was auswählen' });
     $form->add_constraint({ type=> 'Date',     name=> 'datetest', text=> 'das ist doch kein datum' });
     $form->add_constraint({ type=> 'Email',    name=> 'mailtest', text=> 'ungültige Mailadresse' });
@@ -205,6 +211,8 @@ to start with, two simple examples of how to use turboform. I am still working o
        my @cols= ('txt1','date','txt2','checkboxtest');
        my $data=$form->map_value(@cols); 
     }
+
+
 
 =head2 Usage Variant 2 : via yml file:
 

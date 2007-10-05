@@ -10,7 +10,7 @@ sub render {
   my $disabled='';
   my $class='form_textarea';
 
-  $class = $self->class;
+  $class = $self->class if ($self->class);
   my $name=' name="'.$self->name.'" ';
   my $value=$request->{ $self->name };
 

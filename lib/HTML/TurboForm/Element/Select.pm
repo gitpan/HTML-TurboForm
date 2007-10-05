@@ -22,7 +22,7 @@ sub render{
         my $values = $request->{ $self->name };
         $values = [ $values ] unless ref( $values ) =~ /ARRAY/;
         $checked='';
-        $checked=' selected ' if ( grep { $_ eq $value } @{ $values } );
+        if ( $values && $value ) { $checked=' selected ' if ( grep { $_ eq $value } @{ $values } ); }
         $result.='<option '.$checked.' value="'.$value.'">'.$key.'</option>';        
         $result2.='<input type="hidden" '.$name.' value="'.$value.'">' if (($disabled ne '')&& ( $checked ne ''));
     }   

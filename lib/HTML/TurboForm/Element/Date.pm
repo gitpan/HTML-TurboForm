@@ -28,7 +28,7 @@ sub render{
     $result.='<select class="'.$class.'_day" '.$self->get_attr().$disabled.$name.'_day">';
     for (my $i=1;$i<32;$i++){
         $checked='';
-        $checked=' selected ' if ( $request->{ $self->name.'_day' } == $i);
+        if ( $request->{ $self->name.'_day' } ){ $checked=' selected ' if ( $request->{ $self->name.'_day' } == $i);}
         $result.='<option '.$checked.' value="'.$i.'">'.$i.'</option>';
     }
     $result.='</select>';     
@@ -37,7 +37,7 @@ sub render{
  
     for (my $i=0;$i<12;$i++){
         $checked='';
-        $checked=' selected ' if ( $request->{ $self->name.'_month' } == ($i+1));
+        if( $request->{ $self->name.'_month' } ){ $checked=' selected ' if ( $request->{ $self->name.'_month' } == ($i+1)); }
         $result.='<option '.$checked.' value="'.($i+1).'">'.$month[$i].'</option>';
     }
 
@@ -45,7 +45,7 @@ sub render{
     $result.='<select class="'.$class.'_year" '.$self->get_attr().$disabled.$name.'_year">';
     for (my $i=$startyear;$i<=$endyear;$i++){
         $checked='';
-        $checked=' selected ' if ( $request->{ $self->name.'_year' } == $i);
+        if ($request->{ $self->name.'_year' } ){ $checked=' selected ' if ( $request->{ $self->name.'_year' } == $i);}
         $result.='<option '.$checked.' value="'.$i.'">'.$i.'</option>';
     }
     $result.='</select>';       

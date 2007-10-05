@@ -9,8 +9,8 @@ sub render {
   my $result='';
   my $disabled='';
   my $class='form_text';
-  
-  $class = $self->class;
+  $class = $self->class if ($self->class);
+
   my $name=' name="'.$self->name.'" ';
   my $value=' value="'.$request->{ $self->name }.'" ';
 
@@ -20,7 +20,7 @@ sub render {
     $result='<input type="hidden" '.$name.$value.'" />';
   }
     
-  $result =$result.'<input class="form_std" type="'.$self->type.'"'.$disabled.$name.$class.$value.'>' ;  
+  $result .='<input class="form_std" type="'.$self->type.'"'.$disabled.$name.$class.$value.'>' ;  
   return $self->vor($options).$result.$self->nach;
 }
 

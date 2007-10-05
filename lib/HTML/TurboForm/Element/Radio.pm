@@ -33,7 +33,7 @@ sub render{
         my $values = $request->{ $self->name };
         $values = [ $values ] unless ref( $values ) =~ /ARRAY/;
         $checked='';
-        $checked=' checked ' if ( grep { $_ eq $value } @{ $values } );
+        if ([ $values ]) { $checked=' checked ' if ( grep { $_ eq $value } @{ $values } ); }
         $result.=$pre.'<input type="radio" '.$checked.$disabled.$name.' value="'.$value.'">'.$key.$post;
         $result.='<input type="hidden" '.$name.' value="'.$value.'">' if (($disabled ne '')&& ( $checked ne ''));
     }   
