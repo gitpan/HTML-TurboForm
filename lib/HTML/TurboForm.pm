@@ -8,7 +8,7 @@ use warnings;
 use UNIVERSAL::require;
 use YAML::Syck;
 
-our $VERSION='0.03';
+our $VERSION='0.04';
 
 sub new{
   my ($class, $r)=@_;
@@ -55,6 +55,17 @@ sub load{
     }
 }
 
+sub ignore_element{
+  my ($self, $name ) = @_;
+  $self->{element_index}->{$name}->{ignore}='true';
+}
+
+sub unignore_element{
+  my ($self, $name ) = @_;
+  $self->{element_index}->{$name}->{ignore}='false';
+}
+
+
 sub add_element{
   my( $self, $params ) = @_;
   my $class='';
@@ -79,18 +90,46 @@ sub add_element{
   }
 
   $self->{element_index}->{$name}->{index}=$new_len-1;
-  $self->{element_index}->{$name}->{frozen}=0;  
+  $self->{element_index}->{$name}->{frozen}=0;    
+  $self->{element_index}->{$name}->{ignore}='false';  
   $self->{element_index}->{$name}->{error_message}='';  
 }
 
 sub render{
   my ($self)=@_;
-
+ 
+  my $table=-1;
+  my $count=0;
+ 
   my $result='<form method=post enctype="multipart/form-data">';
   foreach my $item(@{$self->{element}}) {
     my $name = $item->name;
-    $result .= $item->render($self->{element_index}->{$name});
+
+    if ($self->{element_index}->{$name}->{ignore} ne 'true'){
+      $item->{table}=-1;
+   
+      if ($item->type eq "TableEnd") {
+         $item->{table}=-1;
+         $table=-1;
+      }
+      if ($item->type eq "Table") {
+         $item->{table}=$item->columns;
+         $item->{colcount}=-1;
+         $count=-1;    
+         $table=$item->columns;     
+      }
+      if ($table>-1) {
+         $count++;
+         $count=1 if ($count>$table);
+         $item->{colcount}=$count;
+         $item->{table}=$table;
+      }
+      $result .= $item->render($self->{element_index}->{$name});
+      }
+  else {
+     $result.="<input type='hidden' name='$name' value='".$item->get_value()."'>";    
   }
+}
   return $result.'</form>';
 }
 
@@ -322,6 +361,18 @@ Only if they successfully match the given constraint rule the form will return v
 Arguments: $fn
 
 Loads a form from a given YML File.
+
+=head2 unignore_element
+
+Arguments: $name
+
+will unIgnore an element so it will be rendered normally
+
+=head2 ignore_element
+
+Arguments: $name
+
+will Ignore an element so it won't be rendered and in effect invisible, it's value will be given to the form as hidden value
 
 =head2 add_element
 

@@ -3,7 +3,7 @@ package HTML::TurboForm::Element;
 use warnings;
 use strict;
 use base qw/ Class::Accessor /;
-__PACKAGE__->mk_accessors( qw/ params type name label text value request options class attributes / );
+__PACKAGE__->mk_accessors( qw/ params type name label text value request options class attributes table columns / );
 
 
 sub add_options{
@@ -39,17 +39,36 @@ sub vor{
     my ($self,$options)=@_;
     my $error='';
     $error=$options->{error_message};
+    my $result='';
+    my $table='';
+
     if ($error ne '') {
         $error="<div class='form_error'>$error</div>";
     }
-    my $result="<div class='form_row'>".$error."<div class='form_left'>".$self->label."</div><div class='form_right'>";
-    $result="<div class='form_row'>" if ($self->type eq "html");
+
+#   if ($self->table>(-1)) {
+#       $table='<td>';
+#       if ($self->colcount==1) $table='<tr><td>';        
+#    }
+
+    $result=$table."<div class='form_row'>".$error."<div class='form_left'>".$self->label."</div><div class='form_right'>";
+    $result=$table."<div class='form_row'>" if ($self->type eq "html");
+    
     return $result;
 }
 
 sub nach{
     my ($self)=@_;
-    my $result= "</div></div>";     
+    my $result= "</div></div>"; 
+    my $table=''; 
+
+#    if ($self->table>(-1)) {
+#      $table='</td>';
+#       if ($self->table==$self->colcount) $table='</tr></td>';        
+#    }
+#    $result.=$table;
+
+
     $result="</div>" if ($self->type eq "html");
     return $result;
 }

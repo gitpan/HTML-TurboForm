@@ -48,14 +48,16 @@ sub render{
                             jpegquality => 90 
                         );
                         $pic = substr( $tmp, length( $self->savedir )+1 );
-                        if ($self->thumbnail->{width} && $self->thumbnail->{height} ) {
-                            $image = $image->scale(xpixels=>$self->thumbnail->{width},ypixels=>$self->thumbnail->{height},type=>'min');  
-                            $image->write( 
-                            file        => $self->savedir.'/thumb_'.$pic, 
-                            type        => 'jpeg', 
-                            jpegquality => 90 
-                            );
-                        }                      
+                        if ($self->thumbnail) {
+                            if ($self->thumbnail->{width} && $self->thumbnail->{height} ) {
+                                $image = $image->scale(xpixels=>$self->thumbnail->{width},ypixels=>$self->thumbnail->{height},type=>'min');  
+                                $image->write( 
+                                file        => $self->savedir.'/thumb_'.$pic, 
+                                type        => 'jpeg', 
+                                jpegquality => 90 
+                                );
+                            }    
+                        }                  
                     }                    
                 } 
            }           
