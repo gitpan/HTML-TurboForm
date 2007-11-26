@@ -13,6 +13,8 @@ sub render{
   }
   
   $class=$self->{class} if exists($self->{class});
+  my $id='';
+  $id=" id='$self->{id}' " if exists($self->{id});
 
   my $value=$self->value;
   $value= ' value="'.$value.'" ';
@@ -21,7 +23,7 @@ sub render{
     my $text= $value;    
   }
     
-  $result =$result.'<input class="form_std" type="submit" name="'.$self->{name}.'" '.$class.$value.'>' ;  
+  $result =$result.'<input class="form_std" type="submit" '.$id.' name="'.$self->{name}.'" '.$class.$value.'>' ;  
   return $self->vor($options).$result.$self->nach;
 }
 

@@ -3,7 +3,7 @@ package HTML::TurboForm::Element;
 use warnings;
 use strict;
 use base qw/ Class::Accessor /;
-__PACKAGE__->mk_accessors( qw/ params type name label text value request options class attributes table columns / );
+__PACKAGE__->mk_accessors( qw/ params type id name label text value request options class attributes table columns / );
 
 
 sub add_options{

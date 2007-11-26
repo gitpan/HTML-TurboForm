@@ -16,7 +16,7 @@ sub render{
     my $request=$self->request;
     my $result='';
     my $disabled='';
-    my $class='form_select';     
+    my $class='form_image_select';     
     $self->label('&nbsp;') if ($self->label eq '');        
     $class=$self->{class}  if exists($self->{class});
     my $name=' name="'.$self->name.'_upload" ';
@@ -28,7 +28,7 @@ sub render{
     $disabled=' disabled ' if ($options->{frozen} == 1);
     if ($options->{frozen} != 1 ){
     $result.='<input type="file" class="'.$class.'" '.$self->get_attr().$disabled.$name.'>';
-    $result.='<input type="submit" value="'.$self->label.'" name="'.$self->name.'_submit">';
+    $result.='<input type="submit" class="form_image_submit" value="'.$self->label.'" name="'.$self->name.'_submit">';
     }
     if ($request->{ $self->name.'_upload' } && $request->{$self->name.'_submit'} ) {    
           if( $self->upload->type !~ /^image\/(jpeg|jpg|gif|png|pjpeg)$/ ) {
