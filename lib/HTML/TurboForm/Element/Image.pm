@@ -16,7 +16,7 @@ sub render{
     my $request=$self->request;
     my $result='';
     my $disabled='';
-    my $class='form_image_select';     
+    my $class='form_image_select';     
     $self->label('&nbsp;') if ($self->label eq '');        
     $class=$self->{class}  if exists($self->{class});
     my $name=' name="'.$self->name.'_upload" ';
