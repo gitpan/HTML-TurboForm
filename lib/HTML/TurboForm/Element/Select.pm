@@ -2,9 +2,11 @@ package HTML::TurboForm::Element::Select;
 use warnings;
 use strict;
 use base qw(HTML::TurboForm::Element);
+__PACKAGE__->mk_accessors( qw/ dbdata dbid dblabel / );
 
 sub render{
-    my ($self, $options)=@_;
+    my ($self, $options, $view)=@_;
+    if ($view) { $self->{view}=$view; }  
     my $request=$self->request;
     my $result='';
     my $disabled='';
@@ -13,19 +15,32 @@ sub render{
     $class=$self->{class}  if exists($self->{class});
     my $name=' name="'.$self->name.'" ';
     my $checked='';
-
+       
     $disabled=' disabled ' if ($options->{frozen} == 1);
+    
+    if ($self->dbdata and $self->dbid and $self->dblabel){       
+       my @t = @{ $self->dbdata };   
+       foreach (@t){            
+            my $label_method = $self->dblabel;
+            my $value_method = $self->dbid;
+            my $l=$_->$label_method;
+            my $v=$_->$value_method;
+            $self->options->{$l}=$v;
+       }        
+    }
     
     $result.='<select class="'.$class.'" '.$self->get_attr().$disabled.$name.'>';
     my $result2='';
-    while ( my( $key,$value) = each %{$self->options}){
-        my $values = $request->{ $self->name };
-        $values = [ $values ] unless ref( $values ) =~ /ARRAY/;
-        $checked='';
-        if ( $values && $value ) { $checked=' selected ' if ( grep { $_ eq $value } @{ $values } ); }
-        $result.='<option '.$checked.' value="'.$value.'">'.$key.'</option>';        
-        $result2.='<input type="hidden" '.$name.' value="'.$value.'">' if (($disabled ne '')&& ( $checked ne ''));
-    }   
+    if ($self->options){
+        while ( my( $key,$value) = each %{$self->options}){
+            my $values = $request->{ $self->name };
+            $values = [ $values ] unless ref( $values ) =~ /ARRAY/;
+            $checked='';
+            if ( $values && $value ) { $checked=' selected ' if ( grep { $_ eq $value } @{ $values } ); }
+            $result.='<option '.$checked.' value="'.$value.'">'.$key.'</option>';        
+            $result2.='<input type="hidden" '.$name.' value="'.$value.'">' if (($disabled ne '')&& ( $checked ne ''));
+        }
+    }
     $result.='</select>';       
 
   return $self->vor($options).$result.$result2.$self->nach;

@@ -2,11 +2,19 @@ package HTML::TurboForm::Element::Html;
 use warnings;
 use strict;
 use base qw(HTML::TurboForm::Element);
+__PACKAGE__->mk_accessors( qw/ pure / );
 
 sub render {
-  my ($self, $options)=@_;
- 
-  return $self->{text};
+  my ($self, $options, $view)=@_;
+  if ($view) { $self->{view}=$view; }  
+  
+  return $self->{text} if ($self->{pure});  
+  return $self->vor($options).$self->{text}.$self->nach;
+}
+
+sub get_dbix{
+    my ($self)=@_;       
+    return 0;
 }
 
 1;

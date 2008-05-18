@@ -8,7 +8,7 @@ use warnings;
 use UNIVERSAL::require;
 use YAML::Syck;
 
-our $VERSION='0.06';
+our $VERSION='0.07';
 
 sub new{
   my ($class, $r)=@_;
@@ -37,7 +37,6 @@ sub add_uploads{
   $self->{uploads} = $uploads;
 }
 
-
 sub load{
     my ($self,$fn)=@_;
     my $data = LoadFile($fn);
@@ -46,7 +45,6 @@ sub load{
         $self->add_element($item);
     }
     foreach my $item( @{ $data->{constraints} }) {
-
         if ($item->{params}->{compvalue}){
            my $tmp=$item->{params}->{compvalue};
            $item->{params}->{comp}=$self->get_value($tmp); 
@@ -65,7 +63,6 @@ sub unignore_element{
   $self->{element_index}->{$name}->{ignore}='false';
 }
 
-
 sub add_element{
   my( $self, $params ) = @_;
   my $class='';
@@ -82,27 +79,74 @@ sub add_element{
   my $element= $class_name->new($params,$self->{uploads}->{$name.'_upload'});
   my $new_len =  push(@ { $self->{element} },  $element);
 
+  $self->{element_index}->{$name}->{index}=$new_len-1;
+  $self->{element_index}->{$name}->{frozen}=0;    
+  $self->{element_index}->{$name}->{ignore}='false';  
+  $self->{element_index}->{$name}->{error_message}='';
+  
   if ($params->{type} eq 'Submit') {
     if ( exists $self->{request}->{$name } ){
       $self->{submitted}=1 ;
       $self->{submit_value} = $name;
     }
   }
+  
+  if ($params->{type} eq 'Captcha') {      
+      my $tname=$name."_input";
+      my $c_val = $self->get_value($name);
+      
+      $self->add_element({ type => 'Text',  name => $tname } );      
+      $self->add_constraint({ type=> 'Equation', operator=>'eq', name=>$tname, comp=>$c_val, text=>$params->{message} });   
+  }
+}
 
-  $self->{element_index}->{$name}->{index}=$new_len-1;
-  $self->{element_index}->{$name}->{frozen}=0;    
-  $self->{element_index}->{$name}->{ignore}='false';  
-  $self->{element_index}->{$name}->{error_message}='';  
+sub get_jquery_modules{
+  my ($self, $url)=@_;  
+  my @modules;
+  my @stylefiles;
+  my $js='';
+  my $result='';
+  my $css_r = '';
+  
+  foreach my $item(@{$self->{element}}) {       
+    if ($item->{modules}){
+       foreach (@{ $item->{modules} }){          
+          my $f = 0; foreach my $t(@modules){ if ($t eq $_) { $f = 1; }}
+          push(@modules, $_) if ($f==0) ; 
+       }       
+    }
+    if ($item->{stylefiles}){
+       foreach (@{ $item->{stylefiles} }){          
+          my $f = 0; foreach my $t(@stylefiles){ if ($t eq $_) { $f = 1; }}
+          push(@stylefiles, $_) if ($f==0) ; 
+       }       
+    }
+    
+    if ($item->{js}){
+      $js.=$item->{js}."\n";
+    }
+  }
+  $js='<script>'."\n".'$(document).ready(function(){ '.$js.' });'."\n".'</script>';  
+  
+  foreach (@modules){
+    $result .='<script type="text/javascript" src="'.$url.'/'.$_.'.js" ></script>'."\n";
+  }
+  foreach (@stylefiles){
+    $css_r.='<link href="'.$url.'/'.$_.'.css" rel="stylesheet" type="text/css" />'."\n";    
+  }
+  
+  return $css_r.$result.$js;
 }
 
 sub render{
-  my ($self)=@_;
+  my ($self, $view)=@_;
  
   my $table=-1;
   my $count=0;
  
   my $result='<form method=post enctype="multipart/form-data">';
-  foreach my $item(@{$self->{element}}) {
+    if ($view eq 'table'){ $result.='<table class="form_table"'; }
+    foreach my $item(@{$self->{element}}) {
     my $name = $item->name;
 
     if ($self->{element_index}->{$name}->{ignore} ne 'true'){
@@ -124,12 +168,13 @@ sub render{
          $item->{colcount}=$count;
          $item->{table}=$table;
       }
-      $result .= $item->render($self->{element_index}->{$name});
+      $result .= $item->render($self->{element_index}->{$name}, $view);
       }
   else {
      $result.="<input type='hidden' name='$name' value='".$item->get_value()."'>";    
   }
 }
+  if ($view eq 'table'){ $result.='</table>'; }
   return $result.'</form>';
 }
 
@@ -151,6 +196,28 @@ sub submitted{
   return $result;
 }
 
+sub get_single_dbix{
+  my ($self,$name)=@_;  
+  my $result = $self->{element}[$self->{element_index}->{$name}->{index}]->get_dbix();  
+  return $result;
+}
+
+sub get_dbix{
+  my ($self)=@_;
+  my $result;
+      
+  foreach (@{$self->{element}}) {
+    my $tmp = $_->get_dbix();    
+    if ($tmp){
+      while ( my ($key, $value) = each(%$tmp) ) {
+        $result->{$key} = $value;
+      }
+    } 
+  }
+  
+  return $result;
+}
+
 sub add_options{
   my ($self,$name,$options)=@_;
   $self->{element}[$self->{element_index}->{$name}->{index}]->add_options($options);
@@ -159,6 +226,7 @@ sub add_options{
 sub freeze{
   my ($self, $name)=@_;
   $self->{element_index}->{$name}->{frozen}=1;
+  $self->{element}[$self->{element_index}->{$name}->{index}]->freeze();
 }
 
 sub freeze_all{
@@ -180,6 +248,12 @@ sub get_value{
   my $result='';
   $result=$self->{element}[$self->{element_index}->{$name}->{index}]->get_value();
   return $result;
+}
+
+sub get_js{
+  my ($self,$name)=@_;
+  
+  return  $self->{element}[$self->{element_index}->{$name}->{index}]->{js};
 }
 
 sub populate{

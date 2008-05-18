@@ -2,17 +2,18 @@ package HTML::TurboForm::Element::Submit;
 use warnings;
 use strict;
 use base qw(HTML::TurboForm::Element);
+__PACKAGE__->mk_accessors( qw/ pure / );
 
 sub render{
-  my ($self, $options)=@_;
+  my ($self, $options, $view)=@_;
+  if ($view) { $self->{view}=$view; }  
   my $result='';
   my $disabled='';
-  my $class='form_submit';
-  if ($self->label eq '') { 
+  
+  if ($self->label and ($self->label eq '')) { 
     $self->label('&nbsp;');
   }
-  
-  $class=$self->{class} if exists($self->{class});
+    
   my $id='';
   $id=" id='$self->{id}' " if exists($self->{id});
 
@@ -23,8 +24,14 @@ sub render{
     my $text= $value;    
   }
     
-  $result =$result.'<input class="form_std" type="submit" '.$id.' name="'.$self->{name}.'" '.$class.$value.'>' ;  
+  $result =$result.'<input class="form_std" type="submit" '.$id.' name="'.$self->{name}.'" '.$value.'>' ;
+  return $result if ($self->{pure});
   return $self->vor($options).$result.$self->nach;
+}
+
+sub get_dbix{
+    my ($self)=@_;       
+    return 0;
 }
 
 1;

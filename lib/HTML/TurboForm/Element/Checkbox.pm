@@ -4,7 +4,8 @@ use strict;
 use base qw(HTML::TurboForm::Element);
 
 sub render{
-    my ($self, $options)=@_;
+    my ($self, $options, $view)=@_;
+    if ($view) { $self->{view}=$view; }  
     my $result='';
     my $disabled='';
     my $class='form_checkbox';

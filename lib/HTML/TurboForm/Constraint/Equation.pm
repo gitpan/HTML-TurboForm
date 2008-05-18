@@ -2,7 +2,7 @@ package HTML::TurboForm::Constraint::Equation;
 use warnings;
 use strict;
 use base qw(HTML::TurboForm::Constraint);
-
+__PACKAGE__->mk_accessors( qw/ operator comp / );
 sub check{
   my ($self)=@_;
   my $result=0;
@@ -10,24 +10,25 @@ sub check{
 
   my $op=''; 
   my $comp_val;
-  my $val=$request->{ $self->{name} };
-  $op=          $self->{params}->{operator};
-  $comp_val =   $self->{params}->{comp};
+  my $val=$request->{ $self->name };
+  $op=          $self->operator;
+  $comp_val =   $self->comp ;
 
   if (($op eq "eq") or ($op eq "ne")) {
     $val="'$val'";
     $comp_val="'$comp_val'";
   }
 
-  my $equation=$val." ".$op." ".$comp_val;
-
-  return 1 if( eval($equation) );
+  if ($val and $op and $comp_val ){
+    my $equation=$val." ".$op." ".$comp_val ;
+    return 1 if( eval($equation) );
+  }
   return 0;  
 }
 
 sub message{
   my ($self)=@_;
-  return $self->{text};
+  return $self->text;
 }
 
 1;

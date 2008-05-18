@@ -1,8 +1,9 @@
 --- 
 abstract: fast and compact HTML Form Class
-author: Thorsten Domsch, camelcase@gmx.de
+author: 
+  - Thorsten Domsch, camelcase@gmx.de
 distribution_type: module
-generated_by: Module::Install version 0.67
+generated_by: Module::Install version 0.68
 license: perl
 meta-spec: 
   url: http://module-build.sourceforge.net/META-spec-v1.3.html
@@ -19,4 +20,4 @@ requires:
   UNIVERSAL::require: 0
   YAML::Syck: 0
   perl: 5.6.1
-version: 0.06
+version: 0.07

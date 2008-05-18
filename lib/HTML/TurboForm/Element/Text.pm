@@ -4,15 +4,18 @@ use strict;
 use base qw(HTML::TurboForm::Element);
 
 sub render {
-  my ($self, $options)=@_;
+  my ($self, $options, $view)=@_;
+  if ($view) { $self->{view}=$view; }  
   my $request=$self->request;
   my $result='';
   my $disabled='';
   my $class='form_text';
   $class = $self->class if ($self->class);
-
+  
+    
   my $name=' name="'.$self->name.'" ';
-  my $value=' value="'.$request->{ $self->name }.'" ';
+  my $value='';
+  $value=' value="'.$request->{ $self->name }.'" ' if ($request->{ $self->name });
 
   if ($options->{frozen} == 1) {
     my $text= $value;
