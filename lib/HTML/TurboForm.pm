@@ -8,7 +8,7 @@ use warnings;
 use UNIVERSAL::require;
 use YAML::Syck;
 
-our $VERSION='0.08';
+our $VERSION='0.09';
 
 sub new{
   my ($class, $r)=@_;
@@ -18,22 +18,22 @@ sub new{
   $self->{submit_value} = '';
   $self->{count}=0;
 
-  bless( $self, $class );  
+  bless( $self, $class );
   return $self;
 }
 
 sub add_constraint{
   my ($self, $params) = @_;
-  
+
   my $name= $params->{name};
   $params->{request}=$self->{request};
   my $class_name = "HTML::TurboForm::Constraint::" . $params->{ type };
-  $class_name->require() or die "Constraint Class '" . $class_name . "' does not exist: $@";  
+  $class_name->require() or die "Constraint Class '" . $class_name . "' does not exist: $@";
   push(@ { $self->{constraints} }, $class_name->new($params));
 }
 
 sub add_uploads{
-  my ($self, $uploads) = @_;  
+  my ($self, $uploads) = @_;
   $self->{uploads} = $uploads;
 }
 
@@ -47,7 +47,7 @@ sub load{
     foreach my $item( @{ $data->{constraints} }) {
         if ($item->{params}->{compvalue}){
            my $tmp=$item->{params}->{compvalue};
-           $item->{params}->{comp}=$self->get_value($tmp); 
+           $item->{params}->{comp}=$self->get_value($tmp);
         }
         $self->add_constraint($item);
     }
@@ -75,75 +75,75 @@ sub add_element{
 
   my $name= $params->{name};
   my $class_name = "HTML::TurboForm::Element::" . $params->{ type };
-  $class_name->require() or die "Class '" . $class_name . "' does not exist: $@";  
+  $class_name->require() or die "Class '" . $class_name . "' does not exist: $@";
   my $element= $class_name->new($params,$self->{uploads}->{$name.'_upload'});
   my $new_len =  push(@ { $self->{element} },  $element);
 
   $self->{element_index}->{$name}->{index}=$new_len-1;
-  $self->{element_index}->{$name}->{frozen}=0;    
-  $self->{element_index}->{$name}->{ignore}='false';  
+  $self->{element_index}->{$name}->{frozen}=0;
+  $self->{element_index}->{$name}->{ignore}='false';
   $self->{element_index}->{$name}->{error_message}='';
-  
+
   if ($params->{type} eq 'Submit') {
     if ( exists $self->{request}->{$name } ){
       $self->{submitted}=1 ;
       $self->{submit_value} = $name;
     }
   }
-  
-  if ($params->{type} eq 'Captcha') {      
+
+  if ($params->{type} eq 'Captcha') {
       my $tname=$name."_input";
       my $c_val = $self->get_value($name);
-      
-      $self->add_element({ type => 'Text',  name => $tname } );      
-      $self->add_constraint({ type=> 'Equation', operator=>'eq', name=>$tname, comp=>$c_val, text=>$params->{message} });   
+
+      $self->add_element({ type => 'Text',  name => $tname } );
+      $self->add_constraint({ type=> 'Equation', operator=>'eq', name=>$tname, comp=>$c_val, text=>$params->{message} });
   }
 }
 
 sub get_jquery_modules{
-  my ($self, $url)=@_;  
+  my ($self, $url)=@_;
   my @modules;
   my @stylefiles;
   my $js='';
   my $result='';
   my $css_r = '';
-  
-  foreach my $item(@{$self->{element}}) {       
+
+  foreach my $item(@{$self->{element}}) {
     if ($item->{modules}){
-       foreach (@{ $item->{modules} }){          
+       foreach (@{ $item->{modules} }){
           my $f = 0; foreach my $t(@modules){ if ($t eq $_) { $f = 1; }}
-          push(@modules, $_) if ($f==0) ; 
-       }       
+          push(@modules, $_) if ($f==0) ;
+       }
     }
     if ($item->{stylefiles}){
-       foreach (@{ $item->{stylefiles} }){          
+       foreach (@{ $item->{stylefiles} }){
           my $f = 0; foreach my $t(@stylefiles){ if ($t eq $_) { $f = 1; }}
-          push(@stylefiles, $_) if ($f==0) ; 
-       }       
+          push(@stylefiles, $_) if ($f==0) ;
+       }
     }
-    
+
     if ($item->{js}){
       $js.=$item->{js}."\n";
     }
   }
-  $js='<script>'."\n".'$(document).ready(function(){ '.$js.' });'."\n".'</script>';  
-  
+  $js='<script>'."\n".'$(document).ready(function(){ '.$js.' });'."\n".'</script>';
+
   foreach (@modules){
     $result .='<script type="text/javascript" src="'.$url.'/'.$_.'.js" ></script>'."\n";
   }
   foreach (@stylefiles){
-    $css_r.='<link href="'.$url.'/'.$_.'.css" rel="stylesheet" type="text/css" />'."\n";    
+    $css_r.='<link href="'.$url.'/'.$_.'.css" rel="stylesheet" type="text/css" />'."\n";
   }
-  
+
   return $css_r.$result.$js;
 }
 
 sub render{
   my ($self, $view)=@_;
- 
+
   my $table=-1;
   my $count=0;
- 
+
   my $result='<form method=post enctype="multipart/form-data">';
     if ($view eq 'table'){ $result.='<table class="form_table"'; }
     foreach my $item(@{$self->{element}}) {
@@ -151,7 +151,7 @@ sub render{
 
     if ($self->{element_index}->{$name}->{ignore} ne 'true'){
       $item->{table}=-1;
-   
+
       if ($item->type eq "TableEnd") {
          $item->{table}=-1;
          $table=-1;
@@ -159,8 +159,8 @@ sub render{
       if ($item->type eq "Table") {
          $item->{table}=$item->columns;
          $item->{colcount}=-1;
-         $count=-1;    
-         $table=$item->columns;     
+         $count=-1;
+         $table=$item->columns;
       }
       if ($table>-1) {
          $count++;
@@ -171,25 +171,25 @@ sub render{
       $result .= $item->render($self->{element_index}->{$name}, $view);
       }
   else {
-     $result.="<input type='hidden' name='$name' value='".$item->get_value()."'>";    
+     $result.="<input type='hidden' name='$name' value='".$item->get_value()."'>";
   }
 }
   if ($view eq 'table'){ $result.='</table>'; }
   return $result.'</form>';
 }
 
-sub submitted{ 
+sub submitted{
   my ($self) = @_;
   my $result='';
   my $set=0;
-  if ($self->{submit_value} ne '') { 
-    $result=$self->{submit_value}; 
+  if ($self->{submit_value} ne '') {
+    $result=$self->{submit_value};
     foreach my $item(@{$self->{constraints}}) {
       my $name=$item->{name};
       if ($item->check() == 0){
         $self->{element_index}->{$name}->{error_message}= $item->message();
         $set=1;
-      }       
+      }
     }
     $result='' if ($set==1);
   }
@@ -197,24 +197,24 @@ sub submitted{
 }
 
 sub get_single_dbix{
-  my ($self,$name)=@_;  
-  my $result = $self->{element}[$self->{element_index}->{$name}->{index}]->get_dbix();  
+  my ($self,$name)=@_;
+  my $result = $self->{element}[$self->{element_index}->{$name}->{index}]->get_dbix();
   return $result;
 }
 
 sub get_dbix{
   my ($self)=@_;
   my $result;
-      
+
   foreach (@{$self->{element}}) {
-    my $tmp = $_->get_dbix();    
+    my $tmp = $_->get_dbix();
     if ($tmp){
       while ( my ($key, $value) = each(%$tmp) ) {
         $result->{$key} = $value;
       }
-    } 
+    }
   }
-  
+
   return $result;
 }
 
@@ -232,10 +232,10 @@ sub freeze{
 sub freeze_all{
   my ($self)=@_;
   my $k;
-  my $v;  
-  foreach $k(keys %{ $self->{element_index} } ){    
+  my $v;
+  foreach $k(keys %{ $self->{element_index} } ){
     $self->{element_index}->{$k}->{frozen}=1;
-  } 
+  }
 }
 
 sub unfreeze{
@@ -252,19 +252,19 @@ sub get_value{
 
 sub get_js{
   my ($self,$name)=@_;
-  
+
   return  $self->{element}[$self->{element_index}->{$name}->{index}]->{js};
 }
 
 sub populate{
   my ($self, $data)=@_;
   my @columns= $data->result_source->columns;
-  
+
   foreach my $item(keys %{$self->{element_index}}) {
-    if ( grep { $item eq $_ } @columns ) { 
+    if ( grep { $item eq $_ } @columns ) {
        if (!$self->{request}->{$item}) { $self->{request}->{$item}=$data->$item;  }
     }
-  } 
+  }
 }
 
 sub map_value{
@@ -291,7 +291,7 @@ to start with, two simple examples of how to use turboform. I am still working o
 
 =head2 Usage variant 1 : via objects and methods
 
- my $options; 
+ my $options;
     $options->{ 'label1' }='1';
     $options->{ 'label2' }='2';
     $options->{ 'label3' }='3';
@@ -308,9 +308,9 @@ to start with, two simple examples of how to use turboform. I am still working o
     $form->add_element({ type => 'Text',     name => 'mailtest',    label => 'E-Mail' } );
     $form->add_element({ type => 'Radio',    name => 'tadiotest',    label => 'radioteile', options => $options, params =>{ 'listmode', 'norow'} } );
     $form->add_element({ type => 'Date',     name => 'datetest',    label => 'Datum', params=>{ startyear=> '2000' , endyear => '2020' } } );
-    $form->add_element({ type => 'Image',     name => 'imagetest',    label => 'Bild', width=>'400', height=>'300', 
-                       thumbnail => { width => '60', height=>'80' }, 
-                       savedir=>'/home/whocares/catalyst/formproject/root/static/images/temp', 
+    $form->add_element({ type => 'Image',     name => 'imagetest',    label => 'Bild', width=>'400', height=>'300',
+                       thumbnail => { width => '60', height=>'80' },
+                       savedir=>'/home/whocares/catalyst/formproject/root/static/images/temp',
                        loadurl=>'/static/images/temp' } );
     $form->add_constraint({ type=> 'Equation', name=> 'texttest', text=> 'kein Vergleich', params=>{ operator => 'eq', comp=>$form->get_value('texttest2') } });
     $form->add_constraint({ type=> 'Required', name=> 'boxtest', text=> 'du musst schon was auswählen' });
@@ -322,7 +322,7 @@ to start with, two simple examples of how to use turboform. I am still working o
     $c->stash->{template}='formtest/formtest.tt';
     if ($form->submitted() eq 'freeze') {
        my @cols= ('txt1','date','txt2','checkboxtest');
-       my $data=$form->map_value(@cols); 
+       my $data=$form->map_value(@cols);
     }
 
 
@@ -359,7 +359,7 @@ elements:
   - type: Checkbox
     label: chooser
     name: checkboxtest
-    options:  
+    options:
         label1: 1
         label2: 2
 
@@ -404,15 +404,15 @@ constraints:
     name: txt1
     text: <font size=2><b>must be higher</b></font>
     params:
-      operator: <   
-      compvalue: txt2  
+      operator: <
+      compvalue: txt2
 
 
 =head1 DESCRIPTION
 
-HTML::TurboForm was designed as a small, fast and compact Form Class to use with catalyst in order to easily create any needed Form. 
-I know there a quite a lot of classes out there which do the same but i wasn't quite content with what i found. 
-They were either too slow or complicated or both. 
+HTML::TurboForm was designed as a small, fast and compact Form Class to use with catalyst in order to easily create any needed Form.
+I know there a quite a lot of classes out there which do the same but i wasn't quite content with what i found.
+They were either too slow or complicated or both.
 
 =head1 METHODS
 
@@ -512,10 +512,10 @@ Expects an array with column names. This method is used to map the request and f
 
 Thorsten Domsch, camelcase@gmx.de
 
-=head1 LICENSE 
- 
-This library is free software, you can redistribute it and/or modify it under 
-the same terms as Perl itself. 
+=head1 LICENSE
+
+This library is free software, you can redistribute it and/or modify it under
+the same terms as Perl itself.
 
 =cut
 

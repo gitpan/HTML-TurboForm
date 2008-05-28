@@ -3,13 +3,14 @@ package HTML::TurboForm::Element;
 use warnings;
 use strict;
 use base qw/ Class::Accessor /;
-__PACKAGE__->mk_accessors( qw/ params dbsearchfield type id name label text value request options class left_class right_class row_class attributes table columns / );
+__PACKAGE__->mk_accessors( qw/ params default dbsearchfield ignore_dbix type id name label text value request options class left_class right_class row_class attributes table columns / );
 
 
 sub new{
     my ($class, $request) = @_;
     my $self = $class->SUPER::new( $request );
     $self->{view} ='';
+    $self->{submitted} = 0;
     $self->init();
     return $self;
 }
@@ -20,7 +21,7 @@ sub init{
 
 sub add_options{
    my ($self, $opt) = @_;
-   $self->{options} = $opt;  
+   $self->{options} = $opt;
 }
 
 sub freeze{
@@ -31,11 +32,11 @@ sub get_attr{
     my ($self) =@_;
     my $result="";
 
-    while ( my( $key,$value) = each %{$self->{attributes}}){        
+    while ( my( $key,$value) = each %{$self->{attributes}}){
         if ($value) {
-            $result.=' '.$key.'="'.$value.'"';         
+            $result.=' '.$key.'="'.$value.'"';
         } else {
-            $result.=' '.$key;         
+            $result.=' '.$key;
         }
     }
 
@@ -52,16 +53,18 @@ sub check_param{
 }
 
 sub get_dbix{
-    my ($self)=@_;    
-    
-    my $dbname=$self->name if ($self->name);
-    $dbname   =$self->dbsearchfield if ($self->dbsearchfield);
-    
-    if($self->get_value() ne '') {
-        return { $dbname => $self->get_value() };
-    } else {
-        return 0;    
-    }    
+    my ($self)=@_;
+
+    if (!$self->ignore_dbix) {
+        my $dbname=$self->name if ($self->name);
+        $dbname   =$self->dbsearchfield if ($self->dbsearchfield);
+
+        if($self->get_value() ne '') {
+            return { $dbname => $self->get_value() };
+        } else {
+            return 0;
+        }
+    }  else {return 0;}
 }
 
 sub vor{
@@ -70,70 +73,70 @@ sub vor{
     $error=$options->{error_message};
     my $result='';
     my $table='';
-  
+
     my $rwc='';
     my $rtc='';
     my $ltc='';
     my $class='class="form_row"';
-    
-    if ($self->{class}) {       $class='class="'.$self->{class}.'"'; }    
-    if ($self->{row_class}) {   $rwc  = " class='".$self->{row_class}."' ";  }    
+
+    if ($self->{class}) {       $class='class="'.$self->{class}.'"'; }
+    if ($self->{row_class}) {   $rwc  = " class='".$self->{row_class}."' ";  }
     if ($self->{right_class}) { $rtc  = " class='".$self->{right_class}."' "; }
     if ($self->{left_class}) {  $ltc  = " class='".$self->{left_class}."' ";  }
 
 #   if ($self->table>(-1)) {
 #       $table='<td>';
-#       if ($self->colcount==1) $table='<tr><td>';        
+#       if ($self->colcount==1) $table='<tr><td>';
 #    }
 
     if ($self->{view} eq '') {
         if ($error ne '') {
             $error="<div class='form_error'>$error</div>";
         }
-        
+
         $result=$table."<div ".$class.$rwc.">".$error.
                        "<div class='form_left'".$ltc.">".$self->label."</div>".
                        "<div class='form_right'".$rtc.">";
         $result=$table."<div ".$class.$rwc.">" if ($self->type eq "Html");
     }
-    
+
     if ($self->{view} eq 'table') {
         if ($error ne '') {
             $error='<tr><td colspan="2" class="form_error">'.$error.'</td></tr>';
         }
-                
+
         $result = $table. $error. "<tr ". $class. $rwc.">".
                        "<td class='form_left'".$ltc.">".$self->label."</td>".
-                       "<td class='form_right'".$rtc.">";        
-                       
+                       "<td class='form_right'".$rtc.">";
+
         $result=$table.'<tr><td colspan="2" '.$class.$rwc.'>' if ($self->type eq "Html");
-    }   
-        
+    }
+
     return $result;
 }
 
 sub nach{
     my ($self)=@_;
-    my $result= "</div></div>"; 
-    my $table=''; 
+    my $result= "</div></div>";
+    my $table='';
 
 #    if ($self->table>(-1)) {
 #      $table='</td>';
-#       if ($self->table==$self->colcount) $table='</tr></td>';        
+#       if ($self->table==$self->colcount) $table='</tr></td>';
 #    }
 #    $result.=$table;
     $result="</div>" if ($self->type eq "Html");
-    
+
     if ($self->{view} eq 'table') {
         $result="</td></tr>";
-    }    
+    }
     $result.="\n";
     return $result;
 }
 
 sub get_value{
     my ($self) = @_;
-    my $result='';    
+    my $result='';
     $result=$self->{request}->{$self->name} if exists($self->{request}->{$self->name});
     return $result;
 }
@@ -169,7 +172,7 @@ adds option tags to a html element
 
 Arguments: none
 
-returns value of the element 
+returns value of the element
 
 =head2 get_attr
 
