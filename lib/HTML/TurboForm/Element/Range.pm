@@ -75,8 +75,8 @@ sub get_dbix{
     $dbname   =$self->dbsearchfield if ($self->dbsearchfield);
 
     my @vals = split(/,/, $self->get_value());
-	my $low  = $vals[0]-1;
-	my $high = $vals[1]+1;
+	my $low  = $vals[0];
+	my $high = $vals[1];
     my $result = 0;
 
     if($self->get_value() ne '') {
