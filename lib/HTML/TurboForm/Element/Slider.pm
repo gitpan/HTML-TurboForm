@@ -22,9 +22,10 @@ sub init{
     $js_min ='if (ui.value == '.$min.') label="'.$self->zerovalue.'";' if($self->zerovalue);
 
     @{$self->{modules}} = ('jquery/jquery-1.2.4b.min','jquery/ui.core.min','jquery/ui.slider.min');
+
     $self->{js} = '
         $("#'.$self->name.'_slider").slider({
-			"steps": '.$step.',
+ 	        "steps": '.$step.',
 			"min": '.$min.',
 			"max": '.$max.',
 			"startValue": '.$start.',
@@ -60,7 +61,7 @@ sub get_dbix{
 
 sub get_value{
     my ($self)=@_;
-    return 0 if (($self->zerovalue) && ($self->{value}==($self->{min}-1)));
+    return 0 if (($self->zerovalue) && ( $self->{value} == ($self->{min}-1)));
     return $self->{value};
 }
 
@@ -92,6 +93,8 @@ sub render {
                 <div class="ui-slider-handle">&nbsp;</div>
             </div>
             <input class="slider_v" type="hidden" name="'.$name.'" id="'.$name.'" value="">';
+
+
 
   return $self->vor($options).$result.$self->nach;
 }

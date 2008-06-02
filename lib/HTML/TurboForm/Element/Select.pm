@@ -6,29 +6,29 @@ __PACKAGE__->mk_accessors( qw/ dbdata dbid dblabel / );
 
 sub render{
     my ($self, $options, $view)=@_;
-    if ($view) { $self->{view}=$view; }  
+    if ($view) { $self->{view}=$view; }
     my $request=$self->request;
     my $result='';
     my $disabled='';
-    my $class='form_select';     
-    $self->label('&nbsp;') if ($self->label eq '');        
+    my $class='form_select';
+    $self->label('&nbsp;') if ($self->label eq '');
     $class=$self->{class}  if exists($self->{class});
     my $name=' name="'.$self->name.'" ';
     my $checked='';
-       
+
     $disabled=' disabled ' if ($options->{frozen} == 1);
-    
-    if ($self->dbdata and $self->dbid and $self->dblabel){       
-       my @t = @{ $self->dbdata };   
-       foreach (@t){            
+
+    if ($self->dbdata and $self->dbid and $self->dblabel){
+       my @t = @{ $self->dbdata };
+       foreach (@t){
             my $label_method = $self->dblabel;
             my $value_method = $self->dbid;
             my $l=$_->$label_method;
             my $v=$_->$value_method;
             $self->options->{$l}=$v;
-       }        
+       }
     }
-    
+
     $result.='<select class="'.$class.'" '.$self->get_attr().$disabled.$name.'>';
     my $result2='';
     if ($self->options){
@@ -36,12 +36,16 @@ sub render{
             my $values = $request->{ $self->name };
             $values = [ $values ] unless ref( $values ) =~ /ARRAY/;
             $checked='';
-            if ( $values && $value ) { $checked=' selected ' if ( grep { $_ eq $value } @{ $values } ); }
-            $result.='<option '.$checked.' value="'.$value.'">'.$key.'</option>';        
+            if ( @{ $values } && $value ) {
+                if ( grep { $_ eq $value } @{ $values } ){
+                    $checked=' selected ';
+                }
+            }
+            $result.='<option '.$checked.' value="'.$value.'">'.$key.'</option>';
             $result2.='<input type="hidden" '.$name.' value="'.$value.'">' if (($disabled ne '')&& ( $checked ne ''));
         }
     }
-    $result.='</select>';       
+    $result.='</select>';
 
   return $self->vor($options).$result.$result2.$self->nach;
 }
