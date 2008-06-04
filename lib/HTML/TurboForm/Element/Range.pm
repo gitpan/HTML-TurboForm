@@ -2,28 +2,38 @@ package HTML::TurboForm::Element::Range;
 use warnings;
 use strict;
 use base qw(HTML::TurboForm::Element);
-__PACKAGE__->mk_accessors( qw/ min max dbtype steps start1 start2 modules / );
+__PACKAGE__->mk_accessors( qw/ min max round zerovalue dbtype steps start1 start2 modules / );
 
 
 sub init{
     my ($self)=@_;
 
-    my $min = 0;
-    my $max = 100;
     my $step = 10;
-    my $start1 = $min;
-    my $start2 = $max;
 
-    print STDERR $self->name." : ".$self->min ." -> ". $self->max ."\n";
-
-    if ($self->min)   { $self->{min}=$self->min; };
-    if ($self->steps) { $step=$self->steps; } else {
-        $step = $self->max - $self->min;
+    if ($self->min) {
+        $self->{min}=int($self->min);
     };
-    if ($self->max)   { $self->{max}=$self->max; };
-    if ($self->start1)  { $start1=$self->start1; };
-    if ($self->start2)  { $start2=$self->start2; };
+
+    if ($self->max) {
+        $self->{max}= int( $self->max );
+        $self->{max}++ if ($self->round);
+    };
+
+    if ($self->start1)  { $self->{start1}=$self->start1; };
+    if ($self->start2)  { $self->{start2}=$self->start2; };
+
     $self->{value}='';
+    my $js_min='';
+	my $js_max='';
+    if($self->zerovalue){
+        $self->{min}-- ;
+        $self->{start1}=$self->{min};
+        $self->{max}++ ;
+        $self->{start2}=$self->{max};
+        $js_min ='if (value1 == '.$self->{min}.') $("#'.$self->name.'_label1").html("'.$self->zerovalue.'");';
+        $js_max ='if (value2 == '.$self->{max}.') $("#'.$self->name.'_label2").html("'.$self->zerovalue.'");';
+    }
+    if ($self->steps) { $step=$self->steps; } else  { $step = $self->{max} - $self->{min}; };
 
 	if ($self->request->{ $self->name }) {
 		$self->{value} = $self->request->{ $self->name };
@@ -42,23 +52,26 @@ sub init{
                 var value1 = $("#'.$self->name.'_slider").slider("value",0);
                 var value2 = $("#'.$self->name.'_slider").slider("value",1);
 				var field = value1+","+value2;
-
                 $("#'.$self->name.'_label1").html(value1.toFixed(0),0);
 		        $("#'.$self->name.'_label2").html(value2.toFixed(0),1);
 				$("#'.$self->name.'").val(field);
+				'.$js_min.'
+                '.$js_max.'
 			}
 		});  ';
 
-    if ($self->start2){
+    if ($self->{start2}){
         $self->{js} .=  '$("#'.$self->name.'_slider").slider("moveTo",'.$self->{start2}.',1);';
     }
-    if ($self->start1){
+    if ($self->{start1}){
         $self->{js} .=  '$("#'.$self->name.'_slider").slider("moveTo",'.$self->{start1}.',0);';
     }
 }
 
 sub get_value{
     my ($self)=@_;
+    return 0 if (($self->zerovalue) && ( $self->{value} == ($self->{min}-1)));
+    return 0 if (($self->zerovalue) && ( $self->{value} == ($self->{max}+1)));
     return $self->{value};
 }
 
@@ -78,12 +91,19 @@ sub get_dbix{
 	my $low  = $vals[0];
 	my $high = $vals[1];
     my $result = 0;
+    if ($self->zerovalue) {
+       $low='' if ($low == $self->{min});
+       $high='' if ($high == $self->{max});
+    }
 
     if($self->get_value() ne '') {
+        $result={};
         if ($self->dbtype) {
-            $result = { 'CAST('.$dbname.' AS '.$self->dbtype.')' => { '>=' => [$low] , '<=' => [$high] } };
+            $result->{'CAST('.$dbname.' AS '.$self->dbtype.')'}->{'>='}=[$low]  if ($low ne '');
+            $result->{'CAST('.$dbname.' AS '.$self->dbtype.')'}->{'<='}=[$high] if ($high ne '');
         } else {
-            $result = {  $dbname => { '>=' => $low, '<=' => $high  } };
+            $result->{$dbname}->{'>='}=$low  if ($low ne '');
+            $result->{$dbname}->{'<='}=$high if ($high ne '');
         }
     }
     return $result;
@@ -100,6 +120,10 @@ sub render {
   $class = $self->class if ($self->class);
 
   my $name=$self->name;
+  my $minlabel = $self->{min};
+  my $maxlabel = $self->{max};
+  $minlabel = $self->zerovalue if ($self->zerovalue);
+  $maxlabel = $self->zerovalue if ($self->zerovalue);
 
   #print STDERR $self->{min}." bis ".$self->{max}."\n";
 
@@ -107,8 +131,8 @@ sub render {
   #$self->{max} =~ s/^(.*?)\..*$/$1/ ;
 
   $result='  <div class="slider_label">
-             <span class="slider_label_min" id="'.$name.'_label1"></span>
-             <span class="slider_label_max" id="'.$name.'_label2"></span>
+             <span class="slider_label_min" id="'.$name.'_label1">'.$minlabel.'</span>
+             <span class="slider_label_max" id="'.$name.'_label2">'.$maxlabel.'</span>
              </div><br>
              <div id="'.$name.'_slider" class="ui-slider-2">
                 <div id="first" class="ui-slider-handle">&nbsp;</div>
