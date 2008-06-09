@@ -42,7 +42,7 @@ sub init{
 		$self->{start2}= $vals[1];
 	}
 
-    @{$self->{modules}} = ('jquery/jquery-1.2.4b.min','jquery/ui.core.min','jquery/ui.slider.min');
+    @{$self->{modules}} = ('jquery/jquery-1.2.6.min','jquery/ui.core.min','jquery/ui.slider.min');
     $self->{js} = '
         $("#'.$self->name.'_slider").slider({
 			"steps": '.$step.',range:true,
@@ -78,6 +78,8 @@ sub get_value{
 
 sub freeze{
     my ($self)=@_;
+
+
     $self->{js} .=  '$("#'.$self->name.'_slider").slider("disable");';
 }
 

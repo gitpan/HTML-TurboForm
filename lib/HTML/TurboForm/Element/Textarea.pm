@@ -2,10 +2,17 @@ package HTML::TurboForm::Element::Textarea;
 use warnings;
 use strict;
 use base qw(HTML::TurboForm::Element);
+__PACKAGE__->mk_accessors( qw/ tinymce / );
+
+sub init{
+    my ($self)=@_;
+
+    @{$self->{modules}} = ('tinymce/tiny_mce') if ($self->tinymce);
+}
 
 sub render {
   my ($self, $options, $view)=@_;
-  if ($view) { $self->{view}=$view; }  
+  if ($view) { $self->{view}=$view; }
   my $request=$self->request;
   my $result='';
   my $disabled='';
@@ -20,8 +27,19 @@ sub render {
     $disabled=' disabled ';
     $result='<input type="hidden" '.$name.' value="'.$value.'" />';
   }
-    
-  $result =$result.'<textarea class="form_std" '.$disabled.$name.$class.'>'.$value.'</textarea>' ;  
+
+  my $tinytext='';
+  if ($self->tinymce){
+       $tinytext = '
+      <script type="text/javascript">
+	    tinyMCE.init({
+		mode : "textareas",
+		theme : "simple"
+	   });
+      </script>';
+  }
+
+  $result =$result.$tinytext.'<textarea class="form_std" '.$disabled.$name.$class.'>'.$value.'</textarea>' ;
   return $self->vor($options).$result.$self->nach;
 }
 

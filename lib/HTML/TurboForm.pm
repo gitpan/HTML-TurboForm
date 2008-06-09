@@ -8,7 +8,7 @@ use warnings;
 use UNIVERSAL::require;
 use YAML::Syck;
 
-our $VERSION='0.12';
+our $VERSION='0.13';
 
 sub new{
   my ($class, $r)=@_;
@@ -107,7 +107,7 @@ sub get_jquery_modules{
   my $js='';
   my $result='';
   my $css_r = '';
-
+  my $usejquery = 0;
   foreach my $item(@{$self->{element}}) {
     if ($item->{modules}){
        foreach (@{ $item->{modules} }){
@@ -123,16 +123,20 @@ sub get_jquery_modules{
     }
 
     if ($item->{js}){
+      $usejquery = 1;
       $js.=$item->{js}."\n";
     }
   }
-  $js='<script>'."\n".'$(document).ready(function(){ '.$js.' });'."\n".'</script>';
+
+  if ($usejquery==1){
+      $js='<script>'."\n".'$(document).ready(function(){ '.$js.' });'."\n".'</script>';
+  }
 
   foreach (@modules){
-    $result .='<script type="text/javascript" src="'.$url.'/'.$_.'.js" ></script>'."\n";
+    $result .='<script type="text/javascript" src="/'.$url.'/'.$_.'.js" ></script>'."\n";
   }
   foreach (@stylefiles){
-    $css_r.='<link href="'.$url.'/'.$_.'.css" rel="stylesheet" type="text/css" />'."\n";
+    $css_r.='<link href="/'.$url.'/'.$_.'.css" rel="stylesheet" type="text/css" />'."\n";
   }
 
   return $css_r.$result.$js;
@@ -250,11 +254,7 @@ sub get_value{
   return $result;
 }
 
-sub get_js{
-  my ($self,$name)=@_;
 
-  return  $self->{element}[$self->{element_index}->{$name}->{index}]->{js};
-}
 
 sub populate{
   my ($self, $data)=@_;
