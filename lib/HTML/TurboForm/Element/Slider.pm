@@ -21,7 +21,7 @@ sub init{
     my $js_min='';
     $js_min ='if (ui.value == '.$min.') label="'.$self->zerovalue.'";' if($self->zerovalue);
 
-    @{$self->{modules}} = ('jquery/jquery-1.2.6.min','jquery/ui.core.min','jquery/ui.slider.min');
+    @{$self->{modules}} = ('jquery/jquery','jquery/ui.core.min','jquery/ui.slider.min');
 
     $self->{js} = '
         $("#'.$self->name.'_slider").slider({
