@@ -2,7 +2,7 @@ package HTML::TurboForm::Element::Range;
 use warnings;
 use strict;
 use base qw(HTML::TurboForm::Element);
-__PACKAGE__->mk_accessors( qw/ min max round zerovalue dbtype steps start1 start2 modules / );
+__PACKAGE__->mk_accessors( qw/ min max round rangetext zerovalue dbtype steps start1 start2 modules / );
 
 
 sub init{
@@ -78,8 +78,6 @@ sub get_value{
 
 sub freeze{
     my ($self)=@_;
-
-
     $self->{js} .=  '$("#'.$self->name.'_slider").slider("disable");';
 }
 
@@ -132,8 +130,14 @@ sub render {
   #$self->{min} =~ s/^(.*?)\..*$/$1/ ;
   #$self->{max} =~ s/^(.*?)\..*$/$1/ ;
 
+  my $rt='';
+  $rt = '<span class="slider_label_center"> '.$self->{rangetext}.' </span>' if ($self->rangetext);
+
   $result='  <div class="slider_label">
              <span class="slider_label_min" id="'.$name.'_label1">'.$minlabel.'</span>
+
+             '.$rt.'
+
              <span class="slider_label_max" id="'.$name.'_label2">'.$maxlabel.'</span>
              </div><br>
              <div id="'.$name.'_slider" class="ui-slider-2">

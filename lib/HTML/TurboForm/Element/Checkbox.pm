@@ -2,47 +2,67 @@ package HTML::TurboForm::Element::Checkbox;
 use warnings;
 use strict;
 use base qw(HTML::TurboForm::Element);
+__PACKAGE__->mk_accessors( qw/ tablelayout / );
 
 sub render{
     my ($self, $options, $view)=@_;
-    if ($view) { $self->{view}=$view; }  
+    if ($view) { $self->{view}=$view; }
     my $result='';
     my $disabled='';
     my $class='form_checkbox';
     my $request=$self->request;
-     
-    $self->label('&nbsp;') if ($self->label eq '');  
-  
+
+    $self->label('&nbsp;') if ($self->label eq '');
+
     $class=$self->{class}  if exists($self->{class});
-    my $aha=$self->options;
+
     my $name=' name="'.$self->name.'" ';
     my $checked='';
-    
-    $disabled=' disabled ' if ($options->{frozen} == 1) ;        
+
+    $disabled=' disabled ' if ($options->{frozen} == 1) ;
     my $pre='';
     my $post='';
     my $after='';
 
-    if ( $self->check_param('listmode')==1){  
+    if ( $self->check_param('listmode')==1){
         $result.='<ul>';
         $pre='<li>';
         $post='</li>';
         $after='</ul>';
     }
 
+    my $counter=0;
+    my $max=0;
+    if ($self->tablelayout) {
+        $result.='<td>';
+        $max = $self->tablelayout ;
+    }
+
     while ( my( $key,$value) = each %{$self->options}){
+
+        $counter++;
+
+        if (($counter == $max) && ($self->tablelayout)) {
+            $result.="</td>\n<td>";
+            $counter = 0;
+        }
+
         my $values = $request->{ $self->name };
         $values = [ $values ] unless ref( $values ) =~ /ARRAY/;
         $checked='';
         if ([ $values]){ $checked=' checked ' if ( grep { $_ eq $value } @{ $values } ); }
         $result.=$pre.'<input type="checkbox" '.$checked.$disabled.$name.' value="'.$value.'">'.$key.$post;
         $result.='<input type="hidden" '.$name.' value="'.$value.'">' if (($disabled ne '')&& ( $checked ne ''));
-    }   
+        $result.='<br />' if($self->tablelayout);
+    }
     $result.=$after;
- 
+
+  $result.='</td>' if ($self->tablelayout);
+
+  return $result if ($self->tablelayout);
   $result= $self->vor($options).$result.$self->nach if ($self->check_param('norow')==0);
-  return $result; 
- 
+
+  return $result;
 }
 
 1;
