@@ -23,6 +23,17 @@ sub new{
        }
     }
 
+     if ($self->dbdata and $self->dbid and not $self->dblabel){
+       my @t = @{ $self->dbdata };
+       my @tmp;
+       foreach (@t){
+            my $value_method = $self->dbid;
+            my $v=$_->$value_method;
+            push(@tmp,$v);
+       }
+       @{$self->{options}} = @tmp;
+     }
+
     $self->init();
     return $self;
 }
@@ -33,7 +44,15 @@ sub init{
 
 sub add_options{
    my ($self, $opt) = @_;
+
    $self->{options} = $opt;
+}
+
+sub reset_options{
+   my ($self, $opt, $dblabel, $dbid) = @_;
+   $self->{dbdata}=[];
+   $self->{options}=[];
+   foreach (@{$opt}){ push(@{$self->options}, $_->$dbid);  }
 }
 
 sub freeze{

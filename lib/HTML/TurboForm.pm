@@ -8,7 +8,7 @@ use warnings;
 use UNIVERSAL::require;
 use YAML::Syck;
 
-our $VERSION='0.16';
+our $VERSION='0.17';
 
 sub new{
   my ($class, $r)=@_;
@@ -17,6 +17,7 @@ sub new{
   $self->{submitted} = 0;
   $self->{submit_value} = '';
   $self->{count}=0;
+  $self->{submit_id} = -1;
 
   bless( $self, $class );
   return $self;
@@ -91,6 +92,24 @@ sub add_element{
     }
   }
 
+  if ($params->{type} eq 'Image') {
+    if ( exists $self->{request}->{$name.'_submit' } ){
+      $self->{submitted}=1 ;
+      $self->{submit_value} = $name.'_uploaded';
+    }
+  }
+
+  if ($params->{type} eq 'Imageslider') {
+    my $f='';
+    $f = $self->find_action($name.'_delete_');
+    if ($f ne ''){
+
+      $self->{submitted}=1 ;
+      $self->{submit_value} = $name.'_delete';
+      $self->{submit_id} = $f;
+    }
+  }
+
   if ($params->{type} eq 'Captcha') {
       my $tname=$name."_input";
       my $c_val = $self->get_value($name);
@@ -98,6 +117,25 @@ sub add_element{
       $self->add_element({ type => 'Text',  name => $tname } );
       $self->add_constraint({ type=> 'Equation', operator=>'eq', name=>$tname, comp=>$c_val, text=>$params->{message} });
   }
+}
+
+sub find_action{
+  my ($self, $action_part)=@_;
+
+  foreach (%{$self->{request}}){
+     if (length($_)>length($action_part)){
+        if (index($_,$action_part) > -1){
+            my $tmp = substr($_,length($action_part));
+            return $tmp if (length($tmp)>0);
+        }
+     }
+  }
+  return '';
+}
+
+sub do{
+  my ($self, $name, $fn)=@_;
+  $self->{element}[$self->{element_index}->{$name}->{index}]->$fn();
 }
 
 sub get_jquery_modules{
@@ -121,7 +159,6 @@ sub get_jquery_modules{
           push(@stylefiles, $_) if ($f==0) ;
        }
     }
-
     if ($item->{js}){
       $usejquery = 1;
       $js.=$item->{js}."\n";
@@ -182,6 +219,15 @@ sub render{
   return $result.'</form>';
 }
 
+sub submit{
+  my ($self) = @_;
+  my $result='';
+  if ($self->{submit_value} ne '') {
+    $result=$self->{submit_value};
+  }
+  return $result;
+}
+
 sub submitted{
   my ($self) = @_;
   my $result='';
@@ -227,6 +273,12 @@ sub add_options{
   $self->{element}[$self->{element_index}->{$name}->{index}]->add_options($options);
 }
 
+sub reset_options{
+  my ($self,$name,$options,$label,$id)=@_;
+
+  $self->{element}[$self->{element_index}->{$name}->{index}]->reset_options($options,$label,$id);
+}
+
 sub freeze{
   my ($self, $name)=@_;
   $self->{element_index}->{$name}->{frozen}=1;
@@ -250,6 +302,7 @@ sub unfreeze{
 sub get_value{
   my ($self, $name)=@_;
   my $result='';
+
   $result=$self->{element}[$self->{element_index}->{$name}->{index}]->get_value();
   return $result;
 }

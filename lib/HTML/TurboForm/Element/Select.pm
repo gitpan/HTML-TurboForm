@@ -2,7 +2,6 @@ package HTML::TurboForm::Element::Select;
 use warnings;
 use strict;
 use base qw(HTML::TurboForm::Element);
-__PACKAGE__->mk_accessors( qw/ dbdata dbid dblabel / );
 
 sub render{
     my ($self, $options, $view)=@_;

@@ -2,23 +2,35 @@ package HTML::TurboForm::Element::Imageslider;
 use warnings;
 use strict;
 use base qw(HTML::TurboForm::Element);
-__PACKAGE__->mk_accessors( qw/ noimgs / );
-
+__PACKAGE__->mk_accessors( qw/ del_link dir noimgs / );
 
 sub init{
     my ($self)=@_;
 
     @{$self->{modules}} = ('jquery/jquery','jquery/jcarousellite_1.0.1.min', 'jquery/easing');
-    my $name=$self->name;
 
-    $self->{js} = '
-        $(function() {
-            $("#'.$name.'").jCarouselLite({
-                btnNext: "#next_'.$name.'",
-                btnPrev: "#prev_'.$name.'"
-            });
-        });
-       ';
+    $self->{max} = 3;
+    my $name=$self->name;
+    $self->reset_js();
+}
+
+sub reset_js{
+  my ($self)=@_;
+  my $name=$self->name;
+
+  my $nr_obj = scalar(@{ $self->{options} });
+  my $max = $self->{max};
+  $max = $nr_obj if($nr_obj < $self->{max});
+
+  $self->{js} = '
+  $(function() {
+      $("#'.$name.'").jCarouselLite({
+             btnNext: "#next_'.$name.'",
+             btnPrev: "#prev_'.$name.'",
+             visible: '.$max.'
+         });
+      });
+  ';
 }
 
 sub render{
@@ -41,11 +53,22 @@ sub render{
     #$result.='<center>upload img</center>';
     $result.='<div class="'.$class.'" id="'.$name.'"><ul>'."\n";
 
-    foreach (@{$self->options}){
-        $result.='<li><img src="'.$_.'" border="0"/></li>'."\n" if (!$self->noimgs);
-        $result.='<li>'.$_.'</li>'."\n" if ($self->noimgs);
+    my $dir='';
+    $dir = $self->dir if ($self->dir);
+
+    foreach (@{$self->{options}}){
+        if (!$self->noimgs){
+            if ($self->del_link){
+                $result.='<li><input class="del_btn" type="submit" name="'.$self->name.'_delete_'.$_.'" value="Delete" /><br />
+                <img src="'.$dir.$_.'" border="0"/></li>'."\n";
+            }else{
+                $result.='<li><img src="'.$dir.$_.'" border="0"/></li>'."\n";
+            }
+        };
+        if ($self->noimgs){ $result.='<li>'.$_.'</li>'."\n";}
     }
-    $result.="</ul></div>";
+
+  $result.="</ul></div>";
   $result= $self->vor($options).$result.$self->nach if ($self->check_param('norow')==0);
   return $result;
 }
