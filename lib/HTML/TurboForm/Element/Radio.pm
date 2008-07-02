@@ -2,6 +2,7 @@ package HTML::TurboForm::Element::Radio;
 use warnings;
 use strict;
 use base qw(HTML::TurboForm::Element);
+__PACKAGE__->mk_accessors( qw/ listmode /);
 
 sub render{
     my ($self, $options, $view)=@_;
@@ -23,7 +24,7 @@ sub render{
     my $post='';
     my $after='';
 
-   if ( $self->check_param('listmode')>0){
+   if ( $self->listmode ){
         $result.='<ul>';
         $pre='<li>';
         $post='</li>';
@@ -42,6 +43,7 @@ sub render{
         $result.=$pre.'<input type="radio" '.$checked.$disabled.$name.' value="'.$value.'">'.$key.$post;
         $result.='<input type="hidden" '.$name.' value="'.$value.'">' if (($disabled ne '')&& ( $checked ne ''));
     }
+
    $result.=$after;
    $result= $self->vor($options).$result.$self->nach if ($self->check_param('norow')==0);
   return $result;

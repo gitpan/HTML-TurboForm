@@ -6,14 +6,17 @@ __PACKAGE__->mk_accessors( qw/ pure / );
 
 sub render{
   my ($self, $options, $view)=@_;
-  if ($view) { $self->{view}=$view; }  
+  if ($view) { $self->{view}=$view; }
   my $result='';
   my $disabled='';
-  
-  if ($self->label and ($self->label eq '')) { 
+
+  if ($self->label and ($self->label eq '')) {
     $self->label('&nbsp;');
   }
-    
+
+  my $class= "form_std";
+  $class=$self->class if ($self->class);
+
   my $id='';
   $id=" id='$self->{id}' " if exists($self->{id});
 
@@ -21,16 +24,16 @@ sub render{
   $value= ' value="'.$value.'" ';
 
   if ($options->{frozen} == 1) {
-    my $text= $value;    
+    my $text= $value;
   }
-    
-  $result =$result.'<input class="form_std" type="submit" '.$id.' name="'.$self->{name}.'" '.$value.'>' ;
+
+  $result =$result.'<input class="'.$class.'" type="submit" '.$id.' name="'.$self->{name}.'" '.$value.'>' ;
   return $result if ($self->{pure});
   return $self->vor($options).$result.$self->nach;
 }
 
 sub get_dbix{
-    my ($self)=@_;       
+    my ($self)=@_;
     return 0;
 }
 

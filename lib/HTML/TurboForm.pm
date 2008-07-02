@@ -8,7 +8,7 @@ use warnings;
 use UNIVERSAL::require;
 use YAML::Syck;
 
-our $VERSION='0.17';
+our $VERSION='0.18';
 
 sub new{
   my ($class, $r)=@_;
@@ -117,6 +117,8 @@ sub add_element{
       $self->add_element({ type => 'Text',  name => $tname } );
       $self->add_constraint({ type=> 'Equation', operator=>'eq', name=>$tname, comp=>$c_val, text=>$params->{message} });
   }
+
+
 }
 
 sub find_action{

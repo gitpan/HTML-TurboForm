@@ -115,15 +115,8 @@ sub vor{
     if ($self->{right_class}) { $rtc  = " class='".$self->{right_class}."' "; }
     if ($self->{left_class}) {  $ltc  = " class='".$self->{left_class}."' ";  }
 
-#   if ($self->table>(-1)) {
-#       $table='<td>';
-#       if ($self->colcount==1) $table='<tr><td>';
-#    }
-
     if ($self->{view} eq '') {
-        if ($error ne '') {
-            $error="<div class='form_error'>$error</div>";
-        }
+        $error="<div class='form_error'>$error</div>" if ($error ne '');
 
         $result=$table."<div ".$class.$rwc.">".$error.
                        "<div class='form_left'".$ltc.">".$self->label."</div>".
@@ -132,15 +125,18 @@ sub vor{
     }
 
     if ($self->{view} eq 'table') {
-        if ($error ne '') {
-            $error='<tr><td colspan="2" class="form_error">'.$error.'</td></tr>';
-        }
+        $error='<tr><td colspan="2" class="form_error">'.$error.'</td></tr>' if ($error ne '');
 
         $result = $table. $error. "<tr ". $class. $rwc.">".
                        "<td class='form_left'".$ltc.">".$self->label."</td>".
                        "<td class='form_right'".$rtc.">";
 
         $result=$table.'<tr><td colspan="2" '.$class.$rwc.'>' if ($self->type eq "Html");
+    }
+
+     if ($self->{view} eq 'column') {
+        $result='<td>'.$self->label.'</td><td>';
+        $result.=$error.'<br />' if ($error ne '');
     }
 
     return $result;
@@ -151,16 +147,10 @@ sub nach{
     my $result= "</div></div>";
     my $table='';
 
-#    if ($self->table>(-1)) {
-#      $table='</td>';
-#       if ($self->table==$self->colcount) $table='</tr></td>';
-#    }
-#    $result.=$table;
     $result="</div>" if ($self->type eq "Html");
+    $result="</td></tr>"  if ($self->{view} eq 'table');
+    $result="</td>"  if ($self->{view} eq 'column');
 
-    if ($self->{view} eq 'table') {
-        $result="</td></tr>";
-    }
     $result.="\n";
     return $result;
 }
