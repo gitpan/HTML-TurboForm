@@ -8,7 +8,7 @@ use warnings;
 use UNIVERSAL::require;
 use YAML::Syck;
 
-our $VERSION='0.18';
+our $VERSION='0.19';
 
 sub new{
   my ($class, $r)=@_;
@@ -87,6 +87,13 @@ sub add_element{
 
   if ($params->{type} eq 'Submit') {
     if ( exists $self->{request}->{$name } ){
+      $self->{submitted}=1 ;
+      $self->{submit_value} = $name;
+    }
+  }
+
+  if ($params->{submit}){
+    if ( $self->{request}->{$name} ){
       $self->{submitted}=1 ;
       $self->{submit_value} = $name;
     }
@@ -218,6 +225,7 @@ sub render{
   }
 }
   if ($view eq 'table'){ $result.='</table>'; }
+  if ($view eq 'clean'){ }
   return $result.'</form>';
 }
 

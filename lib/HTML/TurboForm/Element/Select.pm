@@ -10,9 +10,10 @@ sub render{
     my $result='';
     my $disabled='';
     my $class='form_select';
-    $self->label('&nbsp;') if ($self->label eq '');
+    $self->label('&nbsp;') if (!$self->label);
     $class=$self->{class}  if exists($self->{class});
     my $name=' name="'.$self->name.'" ';
+    my $id=' id="'.$self->name.'" ';
     my $checked='';
 
     $disabled=' disabled ' if ($options->{frozen} == 1);
@@ -28,24 +29,24 @@ sub render{
        }
     }
 
-    $result.='<select class="'.$class.'" '.$self->get_attr().$disabled.$name.'>';
+    $result.='<select class="'.$class.'" '.$self->get_attr().$disabled.$id.$name.'>';
     my $result2='';
     if ($self->options){
         while ( my( $key,$value) = each %{$self->options}){
             my $values = $request->{ $self->name };
             $values = [ $values ] unless ref( $values ) =~ /ARRAY/;
             $checked='';
-            if ( @{ $values } && $value ) {
+            if ( @{ $values } && $value) {
                 if ( grep { $_ eq $value } @{ $values } ){
                     $checked=' selected ';
                 }
             }
             $result.='<option '.$checked.' value="'.$value.'">'.$key.'</option>';
-            $result2.='<input type="hidden" '.$name.' value="'.$value.'">' if (($disabled ne '')&& ( $checked ne ''));
+            $result2.='<input type="hidden" '.$id.$name.' value="'.$value.'">' if (($disabled ne '')&& ( $checked ne ''));
         }
     }
     $result.='</select>';
-
+  return $self->vor($options).$result.$result2.$self->nach if ($self->{pure});
   return $self->vor($options).$result.$result2.$self->nach;
 }
 

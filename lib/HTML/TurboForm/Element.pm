@@ -3,8 +3,7 @@ package HTML::TurboForm::Element;
 use warnings;
 use strict;
 use base qw/ Class::Accessor /;
-__PACKAGE__->mk_accessors( qw/ params default dbsearchfield dbdata dbid dblabel ignore_dbix type id name label text value request options class left_class right_class row_class attributes table columns / );
-
+__PACKAGE__->mk_accessors( qw/ params submit default dbsearchfield dbdata dbid dblabel ignore_dbix type id name label text value request options class left_class right_class row_class attributes table submit columns / );
 
 sub new{
     my ($class, $request) = @_;
@@ -21,6 +20,11 @@ sub new{
             my $v=$_->$value_method;
             $self->options->{$l}=$v;
        }
+    }
+
+    if ($self->submit){
+        @{$self->{modules}} = ('jquery/jquery');
+        $self->{js} = ' $("#'.$self->name.'").'.$self->submit.'(function(){$("form")[0].submit(); });  ';
     }
 
      if ($self->dbdata and $self->dbid and not $self->dblabel){
@@ -126,6 +130,13 @@ sub vor{
 
     if ($self->{view} eq 'table') {
         $error='<tr><td colspan="2" class="form_error">'.$error.'</td></tr>' if ($error ne '');
+
+ $table='' if (!$table);
+ $error='' if (!$error);
+ $class='' if (!$class);
+ $rwc='' if (!$rwc);
+ $rtc='' if (!$rtc);
+ $self->label('') if (!$self->label);
 
         $result = $table. $error. "<tr ". $class. $rwc.">".
                        "<td class='form_left'".$ltc.">".$self->label."</td>".
