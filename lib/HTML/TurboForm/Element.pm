@@ -10,6 +10,7 @@ sub new{
     my $self = $class->SUPER::new( $request );
     $self->{view} ='';
     $self->{submitted} = 0;
+    $self->{submitted} = 1 if ($request->{ $self->name });
 
     if ($self->dbdata and $self->dbid and $self->dblabel){
        my @t = @{ $self->dbdata };
@@ -94,6 +95,8 @@ sub get_dbix{
         my $dbname=$self->name if ($self->name);
         $dbname   =$self->dbsearchfield if ($self->dbsearchfield);
 
+		if ($self->type eq 'Select'){ return 0 if ($self->get_value() eq '-1'); }
+
         if($self->get_value() ne '') {
             return { $dbname => $self->get_value() };
         } else {
@@ -146,6 +149,7 @@ sub vor{
     }
 
      if ($self->{view} eq 'column') {
+        $self->label('') if (!$self->label);
         $result='<td>'.$self->label.'</td><td>';
         $result.=$error.'<br />' if ($error ne '');
     }

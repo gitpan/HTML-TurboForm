@@ -88,9 +88,7 @@ sub render{
     my $checked='';
     my $pic='';
     $pic=$request->{$self->name} if ($request->{$self->name});
-
-    $pic= $self->{pic};
-
+   #$pic= $self->{pic};
     $disabled=' disabled ' if ($options->{frozen} == 1);
     if ($options->{frozen} != 1 ){
         $result.='<input type="file" class="'.$class.'" '.$self->get_attr().$disabled.$name.'>';

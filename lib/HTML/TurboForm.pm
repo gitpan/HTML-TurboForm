@@ -8,7 +8,7 @@ use warnings;
 use UNIVERSAL::require;
 use YAML::Syck;
 
-our $VERSION='0.19';
+our $VERSION='0.20';
 
 sub new{
   my ($class, $r)=@_;
@@ -18,9 +18,15 @@ sub new{
   $self->{submit_value} = '';
   $self->{count}=0;
   $self->{submit_id} = -1;
+  $self->{addition_modules}='';
 
   bless( $self, $class );
   return $self;
+}
+
+sub add_modules{
+  my ($self, $mods) = @_;
+   $self->{addition_modules}=$mods;
 }
 
 sub add_constraint{
@@ -185,7 +191,7 @@ sub get_jquery_modules{
     $css_r.='<link href="/'.$url.'/'.$_.'.css" rel="stylesheet" type="text/css" />'."\n";
   }
 
-  return $css_r.$result.$js;
+  return $css_r.$result.$js.$self->{addition_modules};
 }
 
 sub render{
@@ -312,7 +318,6 @@ sub unfreeze{
 sub get_value{
   my ($self, $name)=@_;
   my $result='';
-
   $result=$self->{element}[$self->{element_index}->{$name}->{index}]->get_value();
   return $result;
 }

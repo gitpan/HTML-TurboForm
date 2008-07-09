@@ -16,6 +16,10 @@ sub render{
     my $id=' id="'.$self->name.'" ';
     my $checked='';
 
+    $self->{submitted} = 1 if ($request->{ $self->name });
+    if ($self->{submitted} == 0){
+    	$request->{ $self->name } = $self->default if($self->default);
+    }
     $disabled=' disabled ' if ($options->{frozen} == 1);
 
     if ($self->dbdata and $self->dbid and $self->dblabel){
@@ -32,7 +36,13 @@ sub render{
     $result.='<select class="'.$class.'" '.$self->get_attr().$disabled.$id.$name.'>';
     my $result2='';
     if ($self->options){
-        while ( my( $key,$value) = each %{$self->options}){
+        #while ( my( $key,$value) = each %{$self->options}){
+      	foreach my $key(sort keys %{$self->options}){
+      	#foreach my $key ( sort {$a <=> $b} values  %{$self->options}){
+        my $value = $self->options->{$key};
+
+        #while ( my( $key,$value) = each %{$self->options}){
+
             my $values = $request->{ $self->name };
             $values = [ $values ] unless ref( $values ) =~ /ARRAY/;
             $checked='';
@@ -48,6 +58,14 @@ sub render{
     $result.='</select>';
   return $self->vor($options).$result.$result2.$self->nach if ($self->{pure});
   return $self->vor($options).$result.$result2.$self->nach;
+}
+
+sub get_value{
+    my ($self) = @_;
+    my $result='';
+    $result=$self->{request}->{$self->name} if exists($self->{request}->{$self->name});
+    $result='' if ($result eq '-1');
+    return $result;
 }
 
 1;
