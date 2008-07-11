@@ -8,7 +8,7 @@ use warnings;
 use UNIVERSAL::require;
 use YAML::Syck;
 
-our $VERSION='0.20';
+our $VERSION='0.21';
 
 sub new{
   my ($class, $r)=@_;

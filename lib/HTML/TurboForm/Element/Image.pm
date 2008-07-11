@@ -65,7 +65,7 @@ sub do_img{
                  }
             }
         }
-    }
+    }#end of if upload and submit
 }
 
 sub get_value{

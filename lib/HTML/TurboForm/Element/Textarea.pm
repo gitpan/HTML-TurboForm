@@ -39,7 +39,7 @@ sub render {
       </script>';
   }
 
-  $result =$result.$tinytext.'<textarea class="form_std" '.$disabled.$name.$class.'>'.$value.'</textarea>' ;
+  $result =$result.$tinytext.'<textarea '.$disabled.$name.$class.'>'.$value.'</textarea>' ;
   return $self->vor($options).$result.$self->nach;
 }
 
