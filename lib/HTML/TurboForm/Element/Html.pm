@@ -6,14 +6,14 @@ __PACKAGE__->mk_accessors( qw/ pure / );
 
 sub render {
   my ($self, $options, $view)=@_;
-  if ($view) { $self->{view}=$view; }  
-  
-  return $self->{text} if ($self->{pure});  
+  if ($view) { $self->{view}=$view; }
+
+  return $self->{text} if ($self->{pure});
   return $self->vor($options).$self->{text}.$self->nach;
 }
 
 sub get_dbix{
-    my ($self)=@_;       
+    my ($self)=@_;
     return 0;
 }
 

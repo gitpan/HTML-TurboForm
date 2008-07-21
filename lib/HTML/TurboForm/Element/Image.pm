@@ -18,7 +18,10 @@ sub do_img{
     my ($self)=@_;
     my $request=$self->request;
     my $pic='';
-    if ($request->{ $self->name.'_upload' } && $request->{$self->name.'_submit'} ) {
+    $pic = $self->request->{$self->name} if ($self->request->{$self->name} );
+
+   if ($request->{ $self->name.'_upload' } && $request->{$self->name.'_submit'} ) {
+
         if( $self->upload->type !~ /^image\/(jpeg|jpg|gif|png|pjpeg)$/ ) {
                 #$c->stash->{ 'error' } = 'Filetype not supported!';
         } else {
@@ -88,14 +91,14 @@ sub render{
     my $checked='';
     my $pic='';
     $pic=$request->{$self->name} if ($request->{$self->name});
-   #$pic= $self->{pic};
+    $pic= $self->{pic} if ($self->{pic});
     $disabled=' disabled ' if ($options->{frozen} == 1);
     if ($options->{frozen} != 1 ){
         $result.='<input type="file" class="'.$class.'" '.$self->get_attr().$disabled.$name.'>';
         $result.='<input type="submit" class="form_image_submit" value="'.$self->caption.'" name="'.$self->name.'_submit">';
     }
 
-    $result.='<input type="hidden" name="'.$self->name.'" value="'.$pic.'">';
+    $result.='<input type="hidden" name="'.$self->name.'" value="'.$self->get_value().'">';
     if ($pic ne ''){
         $result.="<br /><br />";
         $result.="<img id='thumbnail' src='".$self->loadurl."/thumb_".$pic."'>" if (($self->thumbnail) && (!$self->noprev));

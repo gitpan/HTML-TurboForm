@@ -5,25 +5,24 @@ use base qw(HTML::TurboForm::Element);
 
 sub render {
   my ($self, $options, $view)=@_;
-  if ($view) { $self->{view}=$view; }  
+  if ($view) { $self->{view}=$view; }
   my $request=$self->request;
   my $result='';
   my $disabled='';
   my $class='form_text';
   $class = $self->class if ($self->class);
-  
-    
+  $class = 'class="'.$class.'"';
   my $name=' name="'.$self->name.'" ';
   my $value='';
   $value=' value="'.$request->{ $self->name }.'" ' if ($request->{ $self->name });
 
-  if ($options->{frozen} == 1) {
+  if ($options->{frozen} eq 1) {
     my $text= $value;
     $disabled=' disabled ';
     $result='<input type="hidden" '.$name.$value.'" />';
   }
-    
-  $result .='<input class="form_std" type="'.$self->type.'"'.$disabled.$name.$class.$value.'>' ;  
+
+  $result .='<input type="'.$self->type.'"'.$disabled.$name.$value.$class.'/>' ;
   return $self->vor($options).$result.$self->nach;
 }
 

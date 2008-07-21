@@ -1,14 +1,12 @@
 package HTML::TurboForm;
 
-use 5.6.1;
-
 use strict;
 use warnings;
 
 use UNIVERSAL::require;
 use YAML::Syck;
 
-our $VERSION='0.21';
+our $VERSION='0.22';
 
 sub new{
   my ($class, $r)=@_;
@@ -84,6 +82,7 @@ sub add_element{
   my $class_name = "HTML::TurboForm::Element::" . $params->{ type };
   $class_name->require() or die "Class '" . $class_name . "' does not exist: $@";
   my $element= $class_name->new($params,$self->{uploads}->{$name.'_upload'});
+
   my $new_len =  push(@ { $self->{element} },  $element);
 
   $self->{element_index}->{$name}->{index}=$new_len-1;
@@ -130,8 +129,6 @@ sub add_element{
       $self->add_element({ type => 'Text',  name => $tname } );
       $self->add_constraint({ type=> 'Equation', operator=>'eq', name=>$tname, comp=>$c_val, text=>$params->{message} });
   }
-
-
 }
 
 sub find_action{
@@ -230,6 +227,7 @@ sub render{
      $result.="<input type='hidden' name='$name' value='".$item->get_value()."'>";
   }
 }
+
   if ($view eq 'table'){ $result.='</table>'; }
   if ($view eq 'clean'){ }
   return $result.'</form>';
@@ -280,7 +278,6 @@ sub get_dbix{
       }
     }
   }
-
   return $result;
 }
 
@@ -299,6 +296,27 @@ sub freeze{
   my ($self, $name)=@_;
   $self->{element_index}->{$name}->{frozen}=1;
   $self->{element}[$self->{element_index}->{$name}->{index}]->freeze();
+}
+
+sub get_r{
+  my ($self, $name)=@_;
+  $self->{element}[$self->{element_index}->{$name}->{index}]->pure(1) if (!$self->{element}[$self->{element_index}->{$name}->{index}]->pure);
+  return $self->{element}[$self->{element_index}->{$name}->{index}]->render();
+}
+sub get_e{
+  my ($self, $name)=@_;
+  return '' if (!$self->{element_index}->{$name}->{error_message});
+  return $self->{element_index}->{$name}->{error_message};
+}
+
+sub get_errors{
+  my ($self)=@_;
+  my $k;
+  my $result='';
+  foreach $k(keys %{ $self->{element_index} } ){
+    $result.=$self->{element_index}->{$k}->{error_message}.</ br> if ( $self->{element_index}->{$k}->{error_message});
+  }
+  return $result;
 }
 
 sub freeze_all{
@@ -322,8 +340,6 @@ sub get_value{
   return $result;
 }
 
-
-
 sub populate{
   my ($self, $data)=@_;
   my @columns= $data->result_source->columns;
@@ -340,7 +356,8 @@ sub map_value{
   my $result;
 
   foreach my $item(keys %{$self->{element_index}}) {
-    if ( grep { $item eq $_ } @columns ) { $result->{$item}=$self->get_value($item); }
+    if ( grep { $item eq $_ } @columns ) {
+    	$result->{$item}=$self->get_value($item); }
   }
  return $result;
 }
