@@ -19,4 +19,4 @@ requires:
   Imager: 0
   UNIVERSAL::require: 0
   YAML::Syck: 0
-version: 0.22
+version: 0.23

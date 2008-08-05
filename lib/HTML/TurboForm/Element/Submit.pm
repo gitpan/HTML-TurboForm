@@ -18,7 +18,7 @@ sub render{
   $class=$self->class if ($self->class);
 
   my $id='';
-  $id=" id='$self->{id}' " if exists($self->{id});
+  $id=" id='$self->{name}' ";
 
   my $value=$self->value;
   $value= ' value="'.$value.'" ';
