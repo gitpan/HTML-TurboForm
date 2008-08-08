@@ -3,7 +3,7 @@ package HTML::TurboForm::Element;
 use warnings;
 use strict;
 use base qw/ Class::Accessor /;
-__PACKAGE__->mk_accessors( qw/ params submit pure default dbsearchfield dbdata dbid dblabel ignore_dbix type id name label text value request options class left_class right_class row_class attributes table submit columns / );
+__PACKAGE__->mk_accessors( qw/ params submit pure default dbsearchfield dbdata dbop dbid dblabel ignore_dbix type id name label text value request options class left_class right_class row_class attributes table submit columns / );
 
 sub new{
     my ($class, $request) = @_;
@@ -98,7 +98,7 @@ sub get_dbix{
 		if ($self->type eq 'Select'){ return 0 if ($self->get_value() eq '-1'); }
 
         if($self->get_value() ne '') {
-            return { $dbname => $self->get_value() };
+            return { $dbname =>  $self->get_value()};
         } else {
             return 0;
         }

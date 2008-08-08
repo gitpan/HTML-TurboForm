@@ -2,7 +2,7 @@ package HTML::TurboForm::Element::Slider;
 use warnings;
 use strict;
 use base qw(HTML::TurboForm::Element);
-__PACKAGE__->mk_accessors( qw/ min max steps start modules zerovalue / );
+__PACKAGE__->mk_accessors( qw/ min max steps label_addon start modules zerovalue / );
 
 
 sub init{
@@ -23,6 +23,8 @@ sub init{
 
     @{$self->{modules}} = ('jquery/jquery','jquery/ui.core.min','jquery/ui.slider.min');
 
+    my $labelchange='';
+    $labelchange = 'if (label != "'.$self->zerovalue.'") label+="'.$self->label_addon.'";' if ($self->label_addon);
     $self->{js} = '
         $("#'.$self->name.'_slider").slider({
  	        "steps": '.$step.',
@@ -33,6 +35,7 @@ sub init{
 			    var label = ui.value;
 			    '.$js_min.'
 				$("#'.$self->name.'").val(ui.value);
+				'.$labelchange.'
                 $("#'.$self->name.'_label").html(label);
 			}
 		});  ';
@@ -52,7 +55,12 @@ sub get_dbix{
         if ($val < $self->min) {
             return 0;
         } else {
-            return { $dbname => $val };
+        	if (!$self->dbop){
+            	return { $dbname => $val } ;
+        	} else {
+				return { $dbname => { $self->dbop => $val }} ;
+        	}
+
         }
     } else {
         return 0;
