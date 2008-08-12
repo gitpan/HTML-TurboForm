@@ -17,6 +17,7 @@ lib/HTML/TurboForm/Constraint/Email.pm
 lib/HTML/TurboForm/Constraint/Equation.pm
 lib/HTML/TurboForm/Constraint/Required.pm
 lib/HTML/TurboForm/Element.pm
+lib/HTML/TurboForm/Element/Captcha.pm
 lib/HTML/TurboForm/Element/Checkbox.pm
 lib/HTML/TurboForm/Element/Date.pm
 lib/HTML/TurboForm/Element/Html.pm

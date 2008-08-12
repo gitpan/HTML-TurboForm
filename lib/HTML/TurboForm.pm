@@ -6,7 +6,7 @@ use warnings;
 use UNIVERSAL::require;
 use YAML::Syck;
 
-our $VERSION='0.24';
+our $VERSION='0.26';
 
 sub new{
   my ($class, $r)=@_;
@@ -56,6 +56,16 @@ sub load{
         }
         $self->add_constraint($item);
     }
+}
+
+sub ignore_all{
+  my ($self ) = @_;
+
+  my $k;
+  my $v;
+  foreach $k(keys %{ $self->{element_index} } ){
+    $self->{element_index}->{$k}->{ignore}='true';
+  }
 }
 
 sub ignore_element{
