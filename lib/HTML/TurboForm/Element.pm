@@ -54,13 +54,17 @@ sub add_options{
 }
 
 sub reset_options{
-   my ($self, $opt, $dblabel, $dbid) = @_;
+   my ($self, $opt) = @_;
    $self->{dbdata}=[];
    $self->{options}=[];
-   foreach (@{$opt}){ push(@{$self->options}, $_->$dbid);  }
+   $self->{options} = $opt;
 }
 
 sub freeze{
+    my($self) =@_;
+}
+
+sub populate{
     my($self) =@_;
 }
 
@@ -110,7 +114,8 @@ sub vor{
 
     return "" if ( $self->pure );
     my $error='';
-    $error=$options->{error_message};
+    
+    $error=$options->{error_message} if $options->{error_message};
     my $result='';
     my $table='';
 

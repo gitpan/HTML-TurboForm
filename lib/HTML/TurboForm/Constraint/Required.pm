@@ -2,15 +2,17 @@ package HTML::TurboForm::Constraint::Required;
 use warnings;
 use strict;
 use base qw(HTML::TurboForm::Constraint);
+__PACKAGE__->mk_accessors( qw/ emptyval / );
 
 sub check{
   my ($self)=@_;
   my $request=$self->request;
-
   my $result=0;
+  my $empty = '';
+  $empty=$self->emptyval if ($self->emptyval);
   if (exists($request->{$self->{name}})) {
-    $result=1 if ($request->{$self->{name}} ne '' );    
-  }
+    $result=1 if ($request->{$self->{name}} ne $empty );    
+  }  
   return $result;
 }
 

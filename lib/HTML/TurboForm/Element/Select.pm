@@ -2,6 +2,7 @@ package HTML::TurboForm::Element::Select;
 use warnings;
 use strict;
 use base qw(HTML::TurboForm::Element);
+__PACKAGE__->mk_accessors( qw/ default first / );
 
 sub render{
     my ($self, $options, $view)=@_;
@@ -36,13 +37,11 @@ sub render{
     $result.='<select class="'.$class.'" '.$self->get_attr().$disabled.$id.$name.'>';
     my $result2='';
     if ($self->options){
-        #while ( my( $key,$value) = each %{$self->options}){
+        my $optiontags ='';
+		my $first = '';
       	foreach my $key(sort keys %{$self->options}){
-      	#foreach my $key ( sort {$a <=> $b} values  %{$self->options}){
-        my $value = $self->options->{$key};
-
-        #while ( my( $key,$value) = each %{$self->options}){
-
+            my $value = $self->options->{$key};
+			
             my $values = $request->{ $self->name };
             $values = [ $values ] unless ref( $values ) =~ /ARRAY/;
             $checked='';
@@ -51,9 +50,14 @@ sub render{
                     $checked=' selected ';
                 }
             }
-            $result.='<option '.$checked.' value="'.$value.'">'.$key.'</option>';
+			if ($value ne $self->first){
+                $optiontags.='<option '.$checked.' value="'.$value.'">'.$key.'</option>';
+			} else {
+				$first =  '<option '.$checked.' value="'.$value.'">'.$key.'</option>';
+			}
             $result2.='<input type="hidden" '.$id.$name.' value="'.$value.'">' if (($disabled ne '')&& ( $checked ne ''));
         }
+		$result .= $first.$optiontags;
     }
     $result.='</select>';
   return $self->vor($options).$result.$result2.$self->nach if ($self->{pure});

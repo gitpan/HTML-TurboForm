@@ -6,6 +6,7 @@ __PACKAGE__->mk_accessors( qw/ params request type name text / );
 
 sub message{
   my ($self)=@_;
+  
   return $self->text;
 }
 

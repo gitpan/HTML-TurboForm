@@ -6,7 +6,7 @@ use warnings;
 use UNIVERSAL::require;
 use YAML::Syck;
 
-our $VERSION='0.26';
+our $VERSION='0.28';
 
 sub new{
   my ($class, $r)=@_;
@@ -103,12 +103,12 @@ sub add_element{
   if ($params->{type} eq 'Submit') {
     if ( exists $self->{request}->{$name } ){
       $self->{submitted}=1 ;
-      $self->{submit_value} = $name;
+      $self->{submit_value} = $name;      
     }
   }
 
   if ($params->{submit}){
-    if ( $self->{request}->{$name} ){
+    if ( $self->{request}->{$name} ){      
       $self->{submitted}=1 ;
       $self->{submit_value} = $name;
     }
@@ -118,6 +118,25 @@ sub add_element{
     if ( exists $self->{request}->{$name.'_submit' } ){
       $self->{submitted}=1 ;
       $self->{submit_value} = $name.'_uploaded';
+    }
+  }
+
+  if ($params->{type} eq 'Imagegalerie') {
+    my $f='';
+
+    $f = $self->find_action($name.'_delete_');
+    $self->{submit_value} = $name.'_delete' if ($f ne '');
+    if ($f eq ''){
+      $f = $self->find_action($name.'_next_');
+      $self->{submit_value} = $name.'_next' if ($f ne '');
+    }
+    if ($f eq ''){
+      $f = $self->find_action($name.'_prev_');
+      $self->{submit_value} = $name.'_prev' if ($f ne '');
+    }
+    if ($f ne ''){
+      $self->{submitted}=1 ;
+      $self->{submit_id} = $f;
     }
   }
 
@@ -202,13 +221,17 @@ sub get_jquery_modules{
 }
 
 sub render{
-  my ($self, $view)=@_;
+  my ($self, $view, $action)=@_;
 
   my $table=-1;
   my $count=0;
 
-  my $result='<form method=post enctype="multipart/form-data">';
-    if ($view eq 'table'){ $result.='<table class="form_table"'; }
+  $action=' action="'.$action.'" ' if ($action);
+  $action='' if (!$action);
+  
+
+  my $result='<form method=post enctype="multipart/form-data" '.$action.' >';
+    if ($view eq 'table'){ $result.='<table class="form_table" '.$action.'>'; }
     foreach my $item(@{$self->{element}}) {
     my $name = $item->name;
 
@@ -257,11 +280,11 @@ sub submitted{
   my $result='';
   my $set=0;
   if ($self->{submit_value} ne '') {
-    $result=$self->{submit_value};
-    foreach my $item(@{$self->{constraints}}) {
-      my $name=$item->{name};
-      if ($item->check() == 0){
-        $self->{element_index}->{$name}->{error_message}= $item->message();
+    $result=$self->{submit_value};    
+    foreach my $item(@{$self->{constraints}}) {    
+      my $name=$item->{name};      
+      if ($item->check() == 0){ 
+        $self->{element_index}->{$name}->{error_message}= $item->message();        
         $set=1;
       }
     }
@@ -324,7 +347,7 @@ sub get_errors{
   my $k;
   my $result='';
   foreach $k(keys %{ $self->{element_index} } ){
-    $result.=$self->{element_index}->{$k}->{error_message}.</ br> if ( $self->{element_index}->{$k}->{error_message});
+    $result.=$self->{element_index}->{$k}->{error_message}.'<br />' if ( $self->{element_index}->{$k}->{error_message});
   }
   return $result;
 }
@@ -352,12 +375,30 @@ sub get_value{
 
 sub populate{
   my ($self, $data)=@_;
-  my @columns= $data->result_source->columns;
-
-  foreach my $item(keys %{$self->{element_index}}) {
-    if ( grep { $item eq $_ } @columns ) {
-       if (!$self->{request}->{$item}) { $self->{request}->{$item}=$data->$item;  }
+  
+  if (ref($data) eq 'HASH') {
+    while (my ($key, $value) = each %{ $data }){                
+           $self->{request}->{$key}=$value;           
     }
+  } else {  
+    my @columns= $data->result_source->columns;  
+    foreach my $item(keys %{$self->{element_index}}) {
+      if ( grep { $item eq $_ } @columns ) {        
+         if (!$self->{request}->{$item}) {
+          $self->{request}->{$item}=$data->get_column($item);
+         }       
+      }
+    }
+  }
+}
+
+sub serial_populate{
+  my ($self, $data)=@_;
+  my $result = {};
+  my @arr_data = split('&',$data);  
+  foreach (@arr_data) {
+     my @tmp = split('=',$_);
+     $self->{request}->{$tmp[0]} = $tmp[1] if ($tmp[1]);
   }
 }
 

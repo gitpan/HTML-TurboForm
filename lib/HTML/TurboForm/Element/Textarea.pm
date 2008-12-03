@@ -2,7 +2,7 @@ package HTML::TurboForm::Element::Textarea;
 use warnings;
 use strict;
 use base qw(HTML::TurboForm::Element);
-__PACKAGE__->mk_accessors( qw/ tinymce / );
+__PACKAGE__->mk_accessors( qw/ id tinymce / );
 
 sub init{
     my ($self)=@_;
@@ -13,12 +13,16 @@ sub init{
 sub render {
   my ($self, $options, $view)=@_;
   if ($view) { $self->{view}=$view; }
+    
   my $request=$self->request;
   my $result='';
   my $disabled='';
   my $class='form_textarea';
 
   $class = $self->class if ($self->class);
+  my $id='';
+  $id = ' id="'.$self->id.'" ' if ($self->id);
+  $class = 'class="'.$class.'"';
   my $name=' name="'.$self->name.'" ';
   my $value=$request->{ $self->name };
 
@@ -39,7 +43,7 @@ sub render {
       </script>';
   }
 
-  $result =$result.$tinytext.'<textarea '.$disabled.$name.$class.'>'.$value.'</textarea>' ;
+  $result =$result.$tinytext.'<textarea '.$disabled.$id.$name.$class.'>'.$value.'</textarea>' ;
   return $self->vor($options).$result.$self->nach;
 }
 

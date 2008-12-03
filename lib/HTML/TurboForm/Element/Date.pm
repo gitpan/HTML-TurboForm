@@ -1,7 +1,9 @@
 package HTML::TurboForm::Element::Date;
 use warnings;
 use strict;
+use DateTime::Format::MySQL;
 use base qw(HTML::TurboForm::Element);
+__PACKAGE__->mk_accessors( qw/ showdate language /);
 
 sub render{
     my ($self, $options, $view)=@_;
@@ -18,7 +20,23 @@ sub render{
     my $endyear=2010;
     $startyear=$self->{params}->{startyear};
     $endyear=$self->{params}->{endyear};
-
+    
+    
+    if (!$self->{request}->{$self->name}.'_day' ) {
+        if ($self->{request}->{$self->name}){
+            my $dt = DateTime::Format::MySQL->parse_datetime($self->{request}->{$self->name});
+            if ($self->showdate ne 'no'){
+                $self->{request}->{$self->name.'_year'} = $dt->year;
+                $self->{request}->{$self->name.'_month'} = $dt->month;
+                $self->{request}->{$self->name.'_day'} = $dt->day;
+            }
+            if ($self->{params}->{showtime} eq '24'){
+                $self->{request}->{$self->name.'_hour'} = $dt->hour;
+                $self->{request}->{$self->name.'_minute'} = $dt->minute;            
+            }               
+        }
+    }
+  
     if ($options->{frozen} == 1){
         $disabled=' disabled ';
         $result.='<input type="hidden" name="'.$self->name.'_day" value="'.$request->{ $self->name.'_day' }.'">';
@@ -26,30 +44,55 @@ sub render{
         $result.='<input type="hidden" name="'.$self->name.'_year" value="'.$request->{ $self->name.'_year' }.'">';
     }
 
-    $result.='<select class="'.$class.'_day" '.$self->get_attr().$disabled.$name.'_day">';
-    for (my $i=1;$i<32;$i++){
-        $checked='';
-        if ( $request->{ $self->name.'_day' } ){ $checked=' selected ' if ( $request->{ $self->name.'_day' } == $i);}
-        $result.='<option '.$checked.' value="'.$i.'">'.$i.'</option>';
-    }
-    $result.='</select>';     
-    $result.='<select class="'.$class.'_month" '.$self->get_attr().$disabled.$name.'_month">';
-    my @month = qw(Januar Februar März April Mai Juni Juli August September Oktober November Dezember);
- 
-    for (my $i=0;$i<12;$i++){
-        $checked='';
-        if( $request->{ $self->name.'_month' } ){ $checked=' selected ' if ( $request->{ $self->name.'_month' } == ($i+1)); }
-        $result.='<option '.$checked.' value="'.($i+1).'">'.$month[$i].'</option>';
-    }
-
-    $result.='</select>';     
-    $result.='<select class="'.$class.'_year" '.$self->get_attr().$disabled.$name.'_year">';
-    for (my $i=$startyear;$i<=$endyear;$i++){
-        $checked='';
-        if ($request->{ $self->name.'_year' } ){ $checked=' selected ' if ( $request->{ $self->name.'_year' } == $i);}
-        $result.='<option '.$checked.' value="'.$i.'">'.$i.'</option>';
-    }
-    $result.='</select>';       
+    if ($self->showdate ne 'no'){
+        $result.='<select class="'.$class.'_day" '.$self->get_attr().$disabled.$name.'_day">';
+        for (my $i=1;$i<32;$i++){
+            $checked='';
+            if ( $request->{ $self->name.'_day' } ){ $checked=' selected ' if ( $request->{ $self->name.'_day' } == $i);}
+            $result.='<option '.$checked.' value="'.$i.'">'.$i.'</option>';
+        }
+        $result.='</select>';     
+        $result.='<select class="'.$class.'_month" '.$self->get_attr().$disabled.$name.'_month">';
+        my @month = qw(Januar Februar März April Mai Juni Juli August September Oktober November Dezember);
+        @month = qw(January February March April May June July August September October November December) if ($self->language eq 'en');
+     
+        for (my $i=0;$i<12;$i++){
+            $checked='';
+            if( $request->{ $self->name.'_month' } ){ $checked=' selected ' if ( $request->{ $self->name.'_month' } == ($i+1)); }
+            $result.='<option '.$checked.' value="'.($i+1).'">'.$month[$i].'</option>';
+        }
+    
+        $result.='</select>';
+        
+        $result.='<select class="'.$class.'_year" '.$self->get_attr().$disabled.$name.'_year">';
+        for (my $i=$startyear;$i<=$endyear;$i++){
+            $checked='';
+            if ($request->{ $self->name.'_year' } ){ $checked=' selected ' if ( $request->{ $self->name.'_year' } == $i);}
+            $result.='<option '.$checked.' value="'.$i.'">'.$i.'</option>';
+        }
+        $result.='</select>';
+    } else {
+        $result.='<input type="hidden" name="'.$self->name.'_day" value="11">';
+        $result.='<input type="hidden" name="'.$self->name.'_month" value="11">';
+        $result.='<input type="hidden" name="'.$self->name.'_year" value="2011">';
+    }    
+    
+    if ($self->{params}->{showtime} eq '24'){
+        $result.='&nbsp;<select class="'.$class.'_hour" '.$self->get_attr().$disabled.$name.'_hour">';
+        for (my $i=0;$i<25;$i++){
+            $checked='';
+            if( $request->{ $self->name.'_hour' } ){ $checked=' selected ' if ( $request->{ $self->name.'_hour' } == ($i)); }
+            $result.='<option '.$checked.' value="'.($i).'">'.$i.'</option>';
+        }   
+        $result.='</select>';
+          $result.='<select class="'.$class.'_minute" '.$self->get_attr().$disabled.$name.'_minute">';
+        for (my $i=0;$i<12;$i++){
+            $checked='';
+            if( $request->{ $self->name.'_minute' } ){ $checked=' selected ' if ( $request->{ $self->name.'_minute' } == ($i*5)); }
+            $result.='<option '.$checked.' value="'.($i*5).'">'.($i*5).'</option>';
+        }   
+        $result.='</select>';      
+    }   
 
     return $self->vor($options).$result.$self->nach;  
 }
@@ -57,11 +100,26 @@ sub render{
 sub get_value{
     my ($self) = @_;
     my $result='';        
-    if ($self->{request}->{$self->name.'_day'}) {
-       $result=$self->{request}->{$self->name.'_year'}.'-'.
-               $self->{request}->{$self->name.'_month'}.'-'.
-               $self->{request}->{$self->name.'_day'};
-    }       
+    if ($self->{request}->{$self->name.'_day'}) {        
+        $result=$self->{request}->{$self->name.'_year'}.'-'.
+        $self->{request}->{$self->name.'_month'}.'-'.
+        $self->{request}->{$self->name.'_day'};        
+        if ($self->{params}->{showtime} eq '24'){
+            $result.=' '.$self->{request}->{$self->name.'_hour'}.'-'.
+            $self->{request}->{$self->name.'_minute'};     
+        }               
+    }  else {
+        if ($self->{request}->{$self->name}){
+            my $dt = DateTime::Format::MySQL->parse_datetime($self->{request}->{$self->name});
+            $self->{request}->{$self->name.'_year'} = $dt->year;
+            $self->{request}->{$self->name.'_month'} = $dt->month;
+            $self->{request}->{$self->name.'_day'} = $dt->day;            
+            if ($self->{params}->{showtime} eq '24'){
+                $self->{request}->{$self->name.'_hour'} = $dt->hour;
+                $self->{request}->{$self->name.'_minute'} = $dt->minute;            
+            }               
+        } 
+    }     
     return $result;
 }
 

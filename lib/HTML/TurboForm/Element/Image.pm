@@ -3,7 +3,7 @@ use warnings;
 use strict;
 use base qw(HTML::TurboForm::Element);
 use Imager;
-__PACKAGE__->mk_accessors( qw/ noprev upload keeporiginal width height savedir thumbnail loadurl caption / );
+__PACKAGE__->mk_accessors( qw/ prev upload keeporiginal width height savedir thumbnail loadurl caption maxsize errormessage / );
 
 sub new{
     my ($class, $request, $upload) = @_;
@@ -21,51 +21,78 @@ sub do_img{
     $pic = $self->request->{$self->name} if ($self->request->{$self->name} );
 
    if ($request->{ $self->name.'_upload' } && $request->{$self->name.'_submit'} ) {
-
         if( $self->upload->type !~ /^image\/(jpeg|jpg|gif|png|pjpeg)$/ ) {
                 #$c->stash->{ 'error' } = 'Filetype not supported!';
         } else {
             # read image
-            my $image = Imager->new;
-            if( $image->read( file => $self->upload->tempname ) ) {
-                # remove alpha channels because jpg does not support it  # and its not used anyways
-                $image = $image->convert( preset => 'noalpha' );
-                #attribute keeporignal isparams local path for storing orig sized images
-
-                my $tmp = File::Temp->new( DIR => $self->savedir.'', UNLINK => 0, SUFFIX => '.jpg' );
-                $pic = substr( $tmp, length( $self->savedir )+1 );
-                $self->{pic}=$pic;
-
-                if ($self->keeporiginal){
-                    $image->write(
-                            file        => $self->keeporiginal.'/orig_'.$pic,
-                            type        => 'jpeg',
-                            jpegquality => 90
-                    );
+            my $image = Imager->new;                        
+            $self->{sizeerror}=0;
+            if ($self->maxsize) {
+                if (($self->upload->size/1024) > $self->maxsize){                    
+                    $self->{sizeerror}=1;
                 }
-
-                if (($self->width) and ($self->height) and ($self->savedir) ){
-                    $image = $image->scale(xpixels=>$self->width,ypixels=>$self->height,type=>'min');
-                    $image->write(
-                        file        => $self->savedir.'/med_'.$pic,
-                        type        => 'jpeg',
-                        jpegquality => 90
-                    );
-
-                    if ($self->thumbnail) {
-                        if ($self->thumbnail->{width} && $self->thumbnail->{height} ) {
-                            $image = $image->scale(xpixels=>$self->thumbnail->{width},ypixels=>$self->thumbnail->{height},type=>'min');
-                            my $thmb_fn = $self->savedir.'/thumb_'.$pic;
-                            $thmb_fn = $self->thumbnail->{savedir}.'/thumb_'.$pic if ($self->thumbnail->{savedir});
-                                $image->write(
-                                file        => $thmb_fn,
+            }            
+            if (!$self->{sizeerror}){
+                if( $image->read( file => $self->upload->tempname ) ) {
+                    # remove alpha channels because jpg does not support it  # and its not used anyways
+                    $image = $image->convert( preset => 'noalpha' );
+                    #attribute keeporignal isparams local path for storing orig sized images
+    
+                    my $tmp = File::Temp->new( DIR => $self->savedir.'', UNLINK => 0, SUFFIX => '.jpg' );
+                    $pic = substr( $tmp, length( $self->savedir )+1 );
+                    $self->{pic}=$pic;
+    
+                    if ($self->keeporiginal){
+                        $image->write(
+                                file        => $self->keeporiginal.'/orig_'.$pic,
                                 type        => 'jpeg',
                                 jpegquality => 90
-                            );
+                        );
+                    }              
+                    
+                    # if there is a save dir, resize. depending if width and/or height is given, scale to dimensions
+                    if ($self->savedir){
+                        if (($self->width) and ($self->height)) {
+                            # No scale. Resize to given dimensions
+                            $image = $image->scaleX(pixels=>$self->width)->scaleY(pixels=>$self->height);
+                        } elsif ($self->width) {
+                            # Resize width, scale height
+                            $image = $image->scale(xpixels=>$self->width);
+                        } elsif ($self->height) {
+                            # Resize height, scale width
+                            $image = $image->scale(ypixels=>$self->height);
                         }
-                    }
-                    unlink($self->savedir.'/'.$pic);
-                 }
+                                                
+                        $image->write(
+                            file        => $self->savedir.'/med_'.$pic,
+                            type        => 'jpeg',
+                            jpegquality => 90
+                        );
+    
+                        if ($self->thumbnail) {
+                            if ($self->thumbnail->{width} || $self->thumbnail->{height} ) {
+                                if (($self->thumbnail->{width}) and ($self->thumbnail->{height})) {
+                                    # No scale. Resize to given dimensions
+                                    $image = $image->scaleX(pixels=>$self->thumbnail->{width})->scaleY(pixels=>$self->thumbnail->{height});
+                                } elsif ($self->thumbnail->{width}) {
+                                    # Resize width, scale height
+                                    $image = $image->scale(xpixels=>$self->thumbnail->{width});
+                                } elsif ($self->thumbnail->{height}) {
+                                    # Resize height, scale width
+                                    $image = $image->scale(ypixels=>$self->thumbnail->{height});
+                                }
+                                my $thmb_fn = $self->savedir.'/thumb_'.$pic;
+                                $thmb_fn = $self->thumbnail->{savedir}.'/thumb_'.$pic if ($self->thumbnail->{savedir});
+                                    $image->write(
+                                    file        => $thmb_fn,
+                                    type        => 'jpeg',
+                                    jpegquality => 90
+                                );
+                            }
+                        }
+                        unlink($self->savedir.'/'.$pic);
+                     }
+                }
             }
         }
     }#end of if upload and submit
@@ -94,6 +121,7 @@ sub render{
     $pic= $self->{pic} if ($self->{pic});
     $disabled=' disabled ' if ($options->{frozen} == 1);
     if ($options->{frozen} != 1 ){
+        $result.= $self->errormessage if ($self->{sizeerror} && $self->errormessage);
         $result.='<input type="file" class="'.$class.'" '.$self->get_attr().$disabled.$name.'>';
         $result.='<input type="submit" class="form_image_submit" value="'.$self->caption.'" name="'.$self->name.'_submit">';
     }
@@ -101,7 +129,7 @@ sub render{
     $result.='<input type="hidden" name="'.$self->name.'" value="'.$self->get_value().'">';
     if ($pic ne ''){
         $result.="<br /><br />";
-        $result.="<img id='thumbnail' src='".$self->loadurl."/thumb_".$pic."'>" if (($self->thumbnail) && (!$self->noprev));
+        $result.="<img id='thumbnail' src='".$self->loadurl."/thumb_".$pic."'>" if (($self->thumbnail) && ($self->prev));
     }
 
   return $self->vor($options).$result.$self->nach;

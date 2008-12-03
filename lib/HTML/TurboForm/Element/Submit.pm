@@ -2,7 +2,7 @@ package HTML::TurboForm::Element::Submit;
 use warnings;
 use strict;
 use base qw(HTML::TurboForm::Element);
-__PACKAGE__->mk_accessors( qw/ pure / );
+__PACKAGE__->mk_accessors( qw/ image pure ajaxcall  / );
 
 sub render{
   my ($self, $options, $view)=@_;
@@ -26,8 +26,16 @@ sub render{
   if ($options->{frozen} == 1) {
     my $text= $value;
   }
-
-  $result =$result.'<input class="'.$class.'" type="submit" '.$id.' name="'.$self->{name}.'" '.$value.'>' ;
+  
+  my $js_tag_text = '';
+  if ($self->ajaxcall) {
+      $result= '<input type="hidden" name="'.$self->name.'" value="1"/>';
+      $result= $result.'<input type="Button" class="'.$class.'" onClick="get_box_data('."'".$self->ajaxcall."'".');" value="'.$self->{value}.'"></input> '; 
+  }  else {
+      my $t = 'type="Submit"';
+      $t = 'type="image" src="'.$self->image.'"' if ($self->image);     
+      $result =$result.'<input class="'.$class.'" '.$t.' '.$id.' name="'.$self->{name}.'" '.$value.' />' ;
+  }
   return $result if ($self->{pure});
   return $self->vor($options).$result.$self->nach;
 }

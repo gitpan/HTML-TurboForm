@@ -7,12 +7,13 @@ inc/Module/Install/Fetch.pm
 inc/Module/Install/Include.pm
 inc/Module/Install/Makefile.pm
 inc/Module/Install/Metadata.pm
-inc/Module/Install/Scripts.pm
 inc/Module/Install/Win32.pm
 inc/Module/Install/WriteAll.pm
 lib/HTML/TurboForm.pm
 lib/HTML/TurboForm/Constraint.pm
 lib/HTML/TurboForm/Constraint/Date.pm
+lib/HTML/TurboForm/Constraint/Length.pm
+lib/HTML/TurboForm/Constraint/Regex.pm
 lib/HTML/TurboForm/Constraint/Email.pm
 lib/HTML/TurboForm/Constraint/Equation.pm
 lib/HTML/TurboForm/Constraint/Required.pm
@@ -25,6 +26,7 @@ lib/HTML/TurboForm/Element/Hidden.pm
 lib/HTML/TurboForm/Element/Image.pm
 lib/HTML/TurboForm/Element/Radio.pm
 lib/HTML/TurboForm/Element/Imageslider.pm
+lib/HTML/TurboForm/Element/Imagegalerie.pm
 lib/HTML/TurboForm/Element/Slider.pm
 lib/HTML/TurboForm/Element/Range.pm
 lib/HTML/TurboForm/Element/Select.pm
