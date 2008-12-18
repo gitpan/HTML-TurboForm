@@ -139,18 +139,18 @@ sub vor{
     }
 
     if ($self->{view} eq 'table') {
-        $error='<tr><td colspan="2" class="form_error">'.$error.'</td></tr>' if ($error ne '');
+        $error='<tr><td colspan="2">'.$error.'</td></tr>' if ($error ne '');
 
  $table='' if (!$table);
  $error='' if (!$error);
- $class='' if (!$class);
+ $class='';
  $rwc='' if (!$rwc);
  $rtc='' if (!$rtc);
  $self->label('') if (!$self->label);
 
         $result = $table. $error. "<tr ". $class. $rwc.">".
-                       "<td class='form_left'".$ltc.">".$self->label."</td>".
-                       "<td class='form_right'".$rtc.">";
+                       "<td ".$ltc.">".$self->label."</td>".
+                       "<td ".$rtc.">";
 
         $result=$table.'<tr><td colspan="2" '.$class.$rwc.'>' if ($self->type eq "Html");
     }

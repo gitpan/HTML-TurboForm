@@ -2,11 +2,9 @@ package HTML::TurboForm;
 
 use strict;
 use warnings;
-
 use UNIVERSAL::require;
 use YAML::Syck;
-
-our $VERSION='0.28';
+our $VERSION='0.30';
 
 sub new{
   my ($class, $r)=@_;
@@ -58,6 +56,16 @@ sub load{
     }
 }
 
+sub unignore_all{
+  my ($self ) = @_;
+
+  my $k;
+  my $v;
+  foreach $k(keys %{ $self->{element_index} } ){
+    $self->{element_index}->{$k}->{ignore}='false';
+  }
+}
+
 sub ignore_all{
   my ($self ) = @_;
 
@@ -66,6 +74,13 @@ sub ignore_all{
   foreach $k(keys %{ $self->{element_index} } ){
     $self->{element_index}->{$k}->{ignore}='true';
   }
+}
+
+sub remove_all{
+  my ($self ) = @_;
+
+  $self->{element_index}={};
+  $self->{element}=();
 }
 
 sub ignore_element{
@@ -220,6 +235,21 @@ sub get_jquery_modules{
   return $css_r.$result.$js.$self->{addition_modules};
 }
 
+sub set_table_class{
+  my ($self, $classname)=@_;
+  $self->{table_class}=$classname;
+}
+
+sub set_table_attributes{
+  my ($self, $attributes)=@_;
+
+  my $attr='';  
+  while ( my ($key, $value) = each(%$attributes) ) {
+      $attr.=$key.'="'.$value.'" ';
+  }
+  $self->{table_attibutes}=$attr;
+}
+
 sub render{
   my ($self, $view, $action)=@_;
 
@@ -227,11 +257,14 @@ sub render{
   my $count=0;
 
   $action=' action="'.$action.'" ' if ($action);
-  $action='' if (!$action);
+  $action='' if (!$action);  
+  my $table_class='class="form_table"';
+  $table_class= 'class="'.$self->{table_class}.'"' if ($self->{table_class});
+  $table_class=$self->{table_attibutes} if ($self->{table_attibutes});
   
-
-  my $result='<form method=post enctype="multipart/form-data" '.$action.' >';
-    if ($view eq 'table'){ $result.='<table class="form_table" '.$action.'>'; }
+    my $result='<form method=post '.$action.'enctype="multipart/form-data">';
+    if ($view eq 'table'){ $result.='<table '.$table_class.'>'; }
+    
     foreach my $item(@{$self->{element}}) {
     my $name = $item->name;
 
