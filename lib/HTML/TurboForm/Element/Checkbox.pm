@@ -2,19 +2,19 @@ package HTML::TurboForm::Element::Checkbox;
 use warnings;
 use strict;
 use base qw(HTML::TurboForm::Element);
-__PACKAGE__->mk_accessors( qw/ tablelayout / );
+__PACKAGE__->mk_accessors( qw/ tablelayout listmode/ );
 
 sub render{
     my ($self, $options, $view)=@_;
     if ($view) { $self->{view}=$view; }
     my $result='';
     my $disabled='';
-    my $class='form_checkbox';
+    my $class='';
     my $request=$self->request;
 
     $self->label('&nbsp;') if ($self->label eq '');
 
-    $class=$self->{class}  if exists($self->{class});
+    $class=' class="'.$self->{class}.'" '  if exists($self->{class});
 
     my $name=' name="'.$self->name.'" ';
     my $checked='';
@@ -24,7 +24,7 @@ sub render{
     my $post='';
     my $after='';
 
-    if ( $self->check_param('listmode')==1){
+    if ( $self->listmode=='1'){
         $result.='<ul>';
         $pre='<li>';
         $post='</li>';
@@ -39,9 +39,7 @@ sub render{
     }
 
     while ( my( $key,$value) = each %{$self->options}){
-
         $counter++;
-
         if (($counter == $max) && ($self->tablelayout)) {
             $result.="</td>\n<td>";
             $counter = 0;
@@ -51,7 +49,7 @@ sub render{
         $values = [ $values ] unless ref( $values ) =~ /ARRAY/;
         $checked='';
         if ([ $values]){ $checked=' checked ' if ( grep { $_ eq $value } @{ $values } ); }
-        $result.=$pre.'<input type="checkbox" '.$checked.$disabled.$name.' value="'.$value.'">'.$key.$post;
+        $result.=$pre.'<input type="checkbox" '.$class.$checked.$disabled.$name.' value="'.$value.'">'.$key.$post;
         $result.='<input type="hidden" '.$name.' value="'.$value.'">' if (($disabled ne '')&& ( $checked ne ''));
         $result.='<br />' if($self->tablelayout);
     }

@@ -23,7 +23,7 @@ sub new{
        }
     }
 
-    if ($self->submit){
+    if ($self->submit){        
         @{$self->{modules}} = ('jquery/jquery');
         $self->{js} = ' $("#'.$self->name.'").'.$self->submit.'(function(){$("form")[0].submit(); });  ';
     }
@@ -183,7 +183,6 @@ sub get_value{
     my ($self) = @_;
     my $result='';
     $result=$self->{request}->{$self->name} if exists($self->{request}->{$self->name});
-
     return $result;
 }
 

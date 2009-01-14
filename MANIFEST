@@ -32,6 +32,7 @@ lib/HTML/TurboForm/Element/Range.pm
 lib/HTML/TurboForm/Element/Select.pm
 lib/HTML/TurboForm/Element/Submit.pm
 lib/HTML/TurboForm/Element/Text.pm
+lib/HTML/TurboForm/Element/Upload.pm
 lib/HTML/TurboForm/Element/Textarea.pm
 Makefile.PL
 MANIFEST			This list of files

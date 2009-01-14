@@ -43,11 +43,12 @@ sub do_img{
                     $self->{pic}=$pic;
     
                     if ($self->keeporiginal){
-                        $image->write(
-                                file        => $self->keeporiginal.'/orig_'.$pic,
-                                type        => 'jpeg',
-                                jpegquality => 90
-                        );
+                        $self->upload->copy_to($self->keeporiginal.'/orig_'.$pic);
+                        #$image->write(
+                        #        file        => $self->keeporiginal.'/orig_'.$pic,
+                        #        type        => 'jpeg',
+                        #        jpegquality => 90
+                        #);
                     }              
                     
                     # if there is a save dir, resize. depending if width and/or height is given, scale to dimensions

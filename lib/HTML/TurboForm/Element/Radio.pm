@@ -2,7 +2,7 @@ package HTML::TurboForm::Element::Radio;
 use warnings;
 use strict;
 use base qw(HTML::TurboForm::Element);
-__PACKAGE__->mk_accessors( qw/ listmode /);
+__PACKAGE__->mk_accessors( qw/ class listmode pre post /);
 
 sub render{
     my ($self, $options, $view)=@_;
@@ -14,6 +14,7 @@ sub render{
 
     $self->label('&nbsp;') if ($self->label eq '');
     $class=$self->{class}  if exists($self->{class});
+    $class=' class="'.$class.'" ';
     my $aha=$self->options;
     my $name=' name="'.$self->name.'" ';
     my $checked='';
@@ -30,6 +31,9 @@ sub render{
         $post='</li>';
         $after='</ul>';
     }
+      
+   $pre.=$self->pre if ($self->pre);
+   $post.=$self->post if ($self->post);
 
     while ( my( $key,$value) = each %{$self->options}){
         my $values = $request->{ $self->name };
@@ -40,7 +44,7 @@ sub render{
         $values = [ $values ] unless ref( $values ) =~ /ARRAY/;
         $checked='';
         if ([ $values ]) { $checked=' checked ' if ( grep { $_ eq $value } @{ $values } ); }
-        $result.=$pre.'<input type="radio" '.$checked.$disabled.$name.' value="'.$value.'">'.$key.$post;
+        $result.=$pre.'<input type="radio" '.$class.$checked.$disabled.$name.' value="'.$value.'">'.$key.$post;
         $result.='<input type="hidden" '.$name.' value="'.$value.'">' if (($disabled ne '')&& ( $checked ne ''));
     }
 

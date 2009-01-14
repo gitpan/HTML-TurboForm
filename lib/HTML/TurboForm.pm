@@ -4,7 +4,7 @@ use strict;
 use warnings;
 use UNIVERSAL::require;
 use YAML::Syck;
-our $VERSION='0.30';
+our $VERSION='0.32';
 
 sub new{
   my ($class, $r)=@_;
@@ -194,6 +194,23 @@ sub do{
   $self->{element}[$self->{element_index}->{$name}->{index}]->$fn();
 }
 
+sub get_javascript{
+  my ($self, $url)=@_;  
+  my $js='';
+  my $result='';  
+  my $usejquery = 0;
+  foreach my $item(@{$self->{element}}) {    
+    if ($item->{js}){
+      $usejquery = 1;
+      $js.=$item->{js}."\n";
+    }
+  }
+  if ($usejquery==1){
+      $js='<script>'."\n".'$(document).ready(function(){ '.$js.' });'."\n".'</script>';
+  }
+  return $js;
+}
+
 sub get_jquery_modules{
   my ($self, $url)=@_;
   my @modules;
@@ -354,7 +371,6 @@ sub add_options{
 
 sub reset_options{
   my ($self,$name,$options,$label,$id)=@_;
-
   $self->{element}[$self->{element_index}->{$name}->{index}]->reset_options($options,$label,$id);
 }
 
