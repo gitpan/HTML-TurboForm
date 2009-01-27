@@ -47,7 +47,7 @@ sub render{
         if ($self->noimgs){ $result.='<td>'.$fn.'</td>'."\n";}
     }
 
-   	$result.='</tr></table>';
+   	$result.='</tr></table></div>';
 
   $result='' if ($nr_obj ==0);
   $result= $self->vor($options).$result.$self->nach if ($self->check_param('norow')==0);
