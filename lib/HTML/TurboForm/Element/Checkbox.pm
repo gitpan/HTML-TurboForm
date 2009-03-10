@@ -24,7 +24,7 @@ sub render{
     my $post='';
     my $after='';
 
-    if ( $self->listmode=='1'){
+    if ( $self->listmode ne '' ){
         $result.='<ul>';
         $pre='<li>';
         $post='</li>';

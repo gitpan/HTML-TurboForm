@@ -4,10 +4,10 @@ use strict;
 use warnings;
 use UNIVERSAL::require;
 use YAML::Syck;
-our $VERSION='0.33';
+our $VERSION='0.36';
 
 sub new{
-  my ($class, $r)=@_;
+  my ($class, $r,$prefix)=@_;
   my $self = {};
   $self->{request}= $r;
   $self->{submitted} = 0;
@@ -15,6 +15,8 @@ sub new{
   $self->{count}=0;
   $self->{submit_id} = -1;
   $self->{addition_modules}='';
+  $self->{prefix}='';
+  $self->{prefix}=$prefix if ($prefix);  
 
   bless( $self, $class );
   return $self;
@@ -28,7 +30,7 @@ sub add_modules{
 sub add_constraint{
   my ($self, $params) = @_;
 
-  my $name= $params->{name};
+  my $name= $self->{prefix}.$params->{name};
   $params->{request}=$self->{request};
   my $class_name = "HTML::TurboForm::Constraint::" . $params->{ type };
   $class_name->require() or die "Constraint Class '" . $class_name . "' does not exist: $@";
@@ -85,11 +87,13 @@ sub remove_all{
 
 sub ignore_element{
   my ($self, $name ) = @_;
+  $name=$self->{prefix}.$name;
   $self->{element_index}->{$name}->{ignore}='true';
 }
 
 sub unignore_element{
   my ($self, $name ) = @_;
+  $name=$self->{prefix}.$name;
   $self->{element_index}->{$name}->{ignore}='false';
 }
 
@@ -102,8 +106,11 @@ sub add_element{
     $self->{count}++;
   }
   $params->{request}=$self->{request};
-
-  my $name= $params->{name};
+  my $namew= $params->{name};
+  my $name= $self->{prefix}.$params->{name};
+  $params->{name}=$name;  
+  #print $name."\n";
+  
   my $class_name = "HTML::TurboForm::Element::" . $params->{ type };
   $class_name->require() or die "Class '" . $class_name . "' does not exist: $@";
   my $element= $class_name->new($params,$self->{uploads}->{$name.'_upload'});
@@ -117,37 +124,36 @@ sub add_element{
 
   if ($params->{type} eq 'Submit') {
     if ( exists $self->{request}->{$name } ){
-      $self->{submitted}=1 ;
-      $self->{submit_value} = $name;      
+      $self->{submitted}=1 ;      
+      $self->{submit_value} = $namew;      
     }
   }
 
   if ($params->{submit}){
     if ( $self->{request}->{$name} ){      
       $self->{submitted}=1 ;
-      $self->{submit_value} = $name;
+      $self->{submit_value} = $namew;
     }
   }
 
   if ($params->{type} eq 'Image') {
     if ( exists $self->{request}->{$name.'_submit' } ){
       $self->{submitted}=1 ;
-      $self->{submit_value} = $name.'_uploaded';
+      $self->{submit_value} = $namew.'_uploaded';
     }
   }
 
   if ($params->{type} eq 'Imagegalerie') {
     my $f='';
-
     $f = $self->find_action($name.'_delete_');
-    $self->{submit_value} = $name.'_delete' if ($f ne '');
+    $self->{submit_value} = $namew.'_delete' if ($f ne '');
     if ($f eq ''){
       $f = $self->find_action($name.'_next_');
-      $self->{submit_value} = $name.'_next' if ($f ne '');
+      $self->{submit_value} = $namew.'_next' if ($f ne '');
     }
     if ($f eq ''){
       $f = $self->find_action($name.'_prev_');
-      $self->{submit_value} = $name.'_prev' if ($f ne '');
+      $self->{submit_value} = $namew.'_prev' if ($f ne '');
     }
     if ($f ne ''){
       $self->{submitted}=1 ;
@@ -159,7 +165,6 @@ sub add_element{
     my $f='';
     $f = $self->find_action($name.'_delete_');
     if ($f ne ''){
-
       $self->{submitted}=1 ;
       $self->{submit_value} = $name.'_delete';
       $self->{submit_id} = $f;
@@ -169,7 +174,6 @@ sub add_element{
   if ($params->{type} eq 'Captcha') {
       my $tname=$name."_input";
       my $c_val = $self->get_value($name);
-
       $self->add_element({ type => 'Text',  name => $tname } );
       $self->add_constraint({ type=> 'Equation', operator=>'eq', name=>$tname, comp=>$c_val, text=>$params->{message} });
   }
@@ -191,7 +195,7 @@ sub find_action{
 
 sub do{
   my ($self, $name, $fn)=@_;
-  $self->{element}[$self->{element_index}->{$name}->{index}]->$fn();
+  $self->{element}[$self->{element_index}->{$self->{prefix}.$name}->{index}]->$fn();
 }
 
 sub get_javascript{
@@ -312,7 +316,7 @@ sub render{
 }
 
   if ($view eq 'table'){ $result.='</table>'; }
-  if ($view eq 'clean'){ }
+  #if ($view eq 'clean'){ }
   return $result.'</form>';
 }
 
@@ -329,8 +333,10 @@ sub submitted{
   my ($self) = @_;
   my $result='';
   my $set=0;
-  if ($self->{submit_value} ne '') {
+  if ($self->{submit_value} ne '') {    
     $result=$self->{submit_value};    
+    #$result=substr($result,length($self->{prefix})) if ($self->{prefix} ne'');    
+    
     foreach my $item(@{$self->{constraints}}) {    
       my $name=$item->{name};      
       if ($item->check() == 0){ 
@@ -345,7 +351,7 @@ sub submitted{
 
 sub get_single_dbix{
   my ($self,$name)=@_;
-  my $result = $self->{element}[$self->{element_index}->{$name}->{index}]->get_dbix();
+  my $result = $self->{element}[$self->{element_index}->{$self->{prefix}.$name}->{index}]->get_dbix();
   return $result;
 }
 
@@ -366,29 +372,29 @@ sub get_dbix{
 
 sub add_options{
   my ($self,$name,$options)=@_;
-  $self->{element}[$self->{element_index}->{$name}->{index}]->add_options($options);
+  $self->{element}[$self->{element_index}->{$self->{prefix}.$name}->{index}]->add_options($options);
 }
 
 sub reset_options{
   my ($self,$name,$options,$label,$id)=@_;
-  $self->{element}[$self->{element_index}->{$name}->{index}]->reset_options($options,$label,$id);
+  $self->{element}[$self->{element_index}->{$self->{prefix}.$name}->{index}]->reset_options($options,$label,$id);
 }
 
 sub freeze{
   my ($self, $name)=@_;
-  $self->{element_index}->{$name}->{frozen}=1;
-  $self->{element}[$self->{element_index}->{$name}->{index}]->freeze();
+  $self->{element_index}->{$self->{prefix}.$name}->{frozen}=1;
+  $self->{element}[$self->{element_index}->{$self->{prefix}.$name}->{index}]->freeze();
 }
 
 sub get_r{
   my ($self, $name)=@_;
-  $self->{element}[$self->{element_index}->{$name}->{index}]->pure(1) if (!$self->{element}[$self->{element_index}->{$name}->{index}]->pure);
-  return $self->{element}[$self->{element_index}->{$name}->{index}]->render();
+  $self->{element}[$self->{element_index}->{$self->{prefix}.$name}->{index}]->pure(1) if (!$self->{element}[$self->{element_index}->{$self->{prefix}.$name}->{index}]->pure);
+  return $self->{element}[$self->{element_index}->{$self->{prefix}.$name}->{index}]->render();
 }
 sub get_e{
   my ($self, $name)=@_;
-  return '' if (!$self->{element_index}->{$name}->{error_message});
-  return $self->{element_index}->{$name}->{error_message};
+  return '' if (!$self->{element_index}->{$self->{prefix}.$name}->{error_message});
+  return $self->{element_index}->{$self->{prefix}.$name}->{error_message};
 }
 
 sub get_errors{
@@ -412,13 +418,13 @@ sub freeze_all{
 
 sub unfreeze{
   my ($self, $name)=@_;
-  $self->{element_index}->{$name}->{frozen}=0;
+  $self->{element_index}->{$self->{prefix}.$name}->{frozen}=0;
 }
 
 sub get_value{
   my ($self, $name)=@_;
   my $result='';
-  $result=$self->{element}[$self->{element_index}->{$name}->{index}]->get_value();
+  $result=$self->{element}[$self->{element_index}->{$self->{prefix}.$name}->{index}]->get_value();
   return $result;
 }
 
@@ -427,14 +433,16 @@ sub populate{
   
   if (ref($data) eq 'HASH') {
     while (my ($key, $value) = each %{ $data }){                
-           $self->{request}->{$key}=$value;           
+           $self->{request}->{$self->{prefix}.$key}=$value;           
     }
   } else {  
-    my @columns= $data->result_source->columns;  
+    my @columns= $data->result_source->columns;
+    
     foreach my $item(keys %{$self->{element_index}}) {
+      $item=substr($item,length($self->{prefix})) if ($self->{prefix} ne'');      
       if ( grep { $item eq $_ } @columns ) {        
-         if (!$self->{request}->{$item}) {
-          $self->{request}->{$item}=$data->get_column($item);
+         if (!$self->{request}->{$self->{prefix}.$item}) {
+          $self->{request}->{$self->{prefix}.$item}=$data->get_column($item);
          }       
       }
     }
@@ -447,7 +455,7 @@ sub serial_populate{
   my @arr_data = split('&',$data);  
   foreach (@arr_data) {
      my @tmp = split('=',$_);
-     $self->{request}->{$tmp[0]} = $tmp[1] if ($tmp[1]);
+     $self->{request}->{$self->{prefix}.$tmp[0]} = $tmp[1] if ($tmp[1]);
   }
 }
 
@@ -456,11 +464,14 @@ sub map_value{
   my $result;
 
   foreach my $item(keys %{$self->{element_index}}) {
-    if ( grep { $item eq $_ } @columns ) {
+    $item=substr($item,length($self->{prefix})) if ($self->{prefix} ne'');    
+    
+    if ( grep { $item eq $_ } @columns ) {  
     	$result->{$item}=$self->get_value($item); }
   }
  return $result;
 }
+
 
 1;
 
