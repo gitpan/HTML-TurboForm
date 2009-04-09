@@ -4,7 +4,7 @@ use strict;
 use warnings;
 use UNIVERSAL::require;
 use YAML::Syck;
-our $VERSION='0.36';
+our $VERSION='0.37';
 
 sub new{
   my ($class, $r,$prefix)=@_;
@@ -706,7 +706,7 @@ Expects an array with column names. This method is used to map the request and f
 
 =head1 AUTHOR
 
-Thorsten Domsch, camelcase@gmx.de
+Thorsten Drobnik, camelcase@hotmail.com
 
 =head1 LICENSE
 

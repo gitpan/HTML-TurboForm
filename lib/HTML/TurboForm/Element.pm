@@ -3,7 +3,7 @@ package HTML::TurboForm::Element;
 use warnings;
 use strict;
 use base qw/ Class::Accessor /;
-__PACKAGE__->mk_accessors( qw/ params submit pure default dbsearchfield dbdata dbop dbid dblabel ignore_dbix type id name label text value request options class left_class right_class row_class attributes table submit columns / );
+__PACKAGE__->mk_accessors( qw/ params submit wrapper pure default dbsearchfield dbdata dbop dbid dblabel ignore_dbix type id name label text value request options class left_class right_class row_class attributes table submit columns / );
 
 sub new{
     my ($class, $request) = @_;
@@ -161,6 +161,15 @@ sub vor{
         $result.=$error.'<br />' if ($error ne '');
     }
 
+    if ($self->wrapper){		  
+		my $wrap=$self->wrapper;
+		$wrap=~s/<label>/$self->label/g;
+		$wrap=~s/<error>/$error/g if ($error ne '');
+		my $pos=index($wrap,'<element>');
+		$result=substr($wrap,0,$pos);
+		$self->{after_wrap}=$result=substr($wrap,$pos+10);
+	}
+
     return $result;
 }
 
@@ -174,6 +183,10 @@ sub nach{
     $result="</div>" if ($self->type eq "Html");
     $result="</td></tr>"  if ($self->{view} eq 'table');
     $result="</td>"  if ($self->{view} eq 'column');
+	
+	if ($self->wrapper){
+		$result=$self->{after_wrap} if ($self->{after_wrap});
+	}
 
     $result.="\n";
     return $result;
