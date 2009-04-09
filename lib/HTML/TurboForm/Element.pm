@@ -163,18 +163,19 @@ sub vor{
 
     if ($self->wrapper){		  
 		my $wrap=$self->wrapper;
-		$wrap=~s/<label>/$self->label/g;
+		my $s=$self->label;
+		$wrap=~s/<label>/$s/g;
 		$wrap=~s/<error>/$error/g if ($error ne '');
 		my $pos=index($wrap,'<element>');
-		$result=substr($wrap,0,$pos);
-		$self->{after_wrap}=$result=substr($wrap,$pos+10);
+		$result=substr($wrap,0,$pos);		
+		$self->{after_wrap}=substr($wrap,$pos+9);
 	}
 
     return $result;
 }
 
 sub nach{
-    my ($self)=@_;
+    my ($self)=@_;        
 
     return "" if ($self->pure );
     my $result= "</div></div>";
