@@ -33,7 +33,6 @@ sub render{
 	    	if ($self->all_link){
 	    		my $label = '';
 	    		$label = '<br /><span class="galerielabel">'.$_->$col_label.'</span>' if($self->dblabel);
-
                 $result.='<td><input class="del_btn" type="submit" name="'.$self->name.'_delete_'.$fn.'" value="Delete" />
                 <input class="del_btn" type="submit" name="'.$self->name.'_prev_'.$fn.'" value="<-" />
                 <input class="del_btn" type="submit" name="'.$self->name.'_next_'.$fn.'" value="->" /><br />

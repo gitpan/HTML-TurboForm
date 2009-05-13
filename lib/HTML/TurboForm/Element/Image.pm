@@ -9,7 +9,6 @@ sub new{
     my ($class, $request, $upload) = @_;
     my $self = $class->SUPER::new( $request );
     $self->upload( $upload );
-
     $self->do_img();
     return $self;
 }
@@ -102,7 +101,11 @@ sub do_img{
 sub get_value{
     my ($self) = @_;
     my $result='';
+    my $request=$self->request;
     $result=$self->{pic};
+    if (!$self->{pic}){
+         $result=$request->{$self->name} if ($request->{$self->name});    
+    }
     return $result;
 }
 
@@ -117,9 +120,9 @@ sub render{
     $class=$self->{class}  if exists($self->{class});
     my $name=' name="'.$self->name.'_upload" ';
     my $checked='';
-    my $pic='';
-    $pic=$request->{$self->name} if ($request->{$self->name});
+    my $pic='';    
     $pic= $self->{pic} if ($self->{pic});
+    $pic=$request->{$self->name} if ($request->{$self->name});    
     $disabled=' disabled ' if ($options->{frozen} == 1);
     if ($options->{frozen} != 1 ){
         $result.= $self->errormessage if ($self->{sizeerror} && $self->errormessage);
@@ -127,7 +130,7 @@ sub render{
         $result.='<input type="submit" class="form_image_submit" value="'.$self->caption.'" name="'.$self->name.'_submit">';
     }
 
-    $result.='<input type="hidden" name="'.$self->name.'" value="'.$self->get_value().'">';
+    $result.='<input type="hidden" name="'.$self->name.'" value="'.$pic.'">';
     if ($pic ne ''){
         $result.="<br /><br />";
         $result.="<img id='thumbnail' src='".$self->loadurl."/thumb_".$pic."'>" if (($self->thumbnail) && ($self->prev));
