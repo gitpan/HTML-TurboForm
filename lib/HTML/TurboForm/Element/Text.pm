@@ -22,7 +22,10 @@ sub render {
     $result='<input type="hidden" '.$name.$value.'" />';
   }
 
-  $result .='<input type="'.$self->type.'"'.$disabled.$name.$value.$class.'/>' ;
+  my $limit='';
+  $limit=' maxlength="'.$self->limit.'"' if ($self->limit);
+
+  $result .='<input type="'.$self->type.'"'.$disabled.$name.$value.$class.$limit.'/>' ;
   return $self->vor($options).$result.$self->nach;
 }
 
@@ -53,4 +56,3 @@ returns HTML Code for element.
 Thorsten Domsch, tdomsch@gmx.de
 
 =cut
-

@@ -3,7 +3,7 @@ package HTML::TurboForm::Element;
 use warnings;
 use strict;
 use base qw/ Class::Accessor /;
-__PACKAGE__->mk_accessors( qw/ params submit wrapper pure default dbsearchfield dbdata dbop dbid dblabel ignore_dbix type id name label text value request options class left_class right_class row_class attributes table submit columns / );
+__PACKAGE__->mk_accessors( qw/ params submit wrapper pure default dbsearchfield dbdata dbop dbid dblabel ignore_dbix type id name label text value request options class left_class limit right_class row_class attributes table submit columns / );
 
 sub new{
     my ($class, $request) = @_;
@@ -23,7 +23,7 @@ sub new{
        }
     }
 
-    if ($self->submit){        
+    if ($self->submit){
         @{$self->{modules}} = ('jquery/jquery');
         $self->{js} = ' $("#'.$self->name.'").'.$self->submit.'(function(){$("form")[0].submit(); });  ';
     }
@@ -114,7 +114,7 @@ sub vor{
 
     return "" if ( $self->pure );
     my $error='';
-    
+
     $error=$options->{error_message} if $options->{error_message};
     my $result='';
     my $table='';
@@ -161,13 +161,13 @@ sub vor{
         $result.=$error.'<br />' if ($error ne '');
     }
 
-    if ($self->wrapper){		  
+    if ($self->wrapper){
 		my $wrap=$self->wrapper;
 		my $s=$self->label;
 		$wrap=~s/<label>/$s/g;
 		$wrap=~s/<error>/$error/g if ($error ne '');
 		my $pos=index($wrap,'<element>');
-		$result=substr($wrap,0,$pos);		
+		$result=substr($wrap,0,$pos);
 		$self->{after_wrap}=substr($wrap,$pos+9);
 	}
 
@@ -175,7 +175,7 @@ sub vor{
 }
 
 sub nach{
-    my ($self)=@_;        
+    my ($self)=@_;
 
     return "" if ($self->pure );
     my $result= "</div></div>";
@@ -184,7 +184,7 @@ sub nach{
     $result="</div>" if ($self->type eq "Html");
     $result="</td></tr>"  if ($self->{view} eq 'table');
     $result="</td>"  if ($self->{view} eq 'column');
-	
+
 	if ($self->wrapper){
 		$result=$self->{after_wrap} if ($self->{after_wrap});
 	}
@@ -262,4 +262,3 @@ return given posthtml
 Thorsten Domsch, tdomsch@gmx.de
 
 =cut
-

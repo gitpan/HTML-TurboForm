@@ -4,7 +4,7 @@ use strict;
 use warnings;
 use UNIVERSAL::require;
 use YAML::Syck;
-our $VERSION='0.39';
+our $VERSION='0.41';
 
 sub new{
   my ($class, $r,$prefix)=@_;
@@ -16,7 +16,7 @@ sub new{
   $self->{submit_id} = -1;
   $self->{addition_modules}='';
   $self->{prefix}='';
-  $self->{prefix}=$prefix if ($prefix);  
+  $self->{prefix}=$prefix if ($prefix);
 
   bless( $self, $class );
   return $self;
@@ -108,9 +108,9 @@ sub add_element{
   $params->{request}=$self->{request};
   my $namew= $params->{name};
   my $name= $self->{prefix}.$params->{name};
-  $params->{name}=$name;  
+  $params->{name}=$name;
   #print $name."\n";
-  
+
   my $class_name = "HTML::TurboForm::Element::" . $params->{ type };
   $class_name->require() or die "Class '" . $class_name . "' does not exist: $@";
   my $element= $class_name->new($params,$self->{uploads}->{$name.'_upload'});
@@ -124,13 +124,13 @@ sub add_element{
 
   if ($params->{type} eq 'Submit') {
     if ( exists $self->{request}->{$name } ){
-      $self->{submitted}=1 ;      
-      $self->{submit_value} = $namew;      
+      $self->{submitted}=1 ;
+      $self->{submit_value} = $namew;
     }
   }
 
   if ($params->{submit}){
-    if ( $self->{request}->{$name} ){      
+    if ( $self->{request}->{$name} ){
       $self->{submitted}=1 ;
       $self->{submit_value} = $namew;
     }
@@ -199,11 +199,11 @@ sub do{
 }
 
 sub get_javascript{
-  my ($self, $url)=@_;  
+  my ($self, $url)=@_;
   my $js='';
-  my $result='';  
+  my $result='';
   my $usejquery = 0;
-  foreach my $item(@{$self->{element}}) {    
+  foreach my $item(@{$self->{element}}) {
     if ($item->{js}){
       $usejquery = 1;
       $js.=$item->{js}."\n";
@@ -264,7 +264,7 @@ sub set_table_class{
 sub set_table_attributes{
   my ($self, $attributes)=@_;
 
-  my $attr='';  
+  my $attr='';
   while ( my ($key, $value) = each(%$attributes) ) {
       $attr.=$key.'="'.$value.'" ';
   }
@@ -278,14 +278,14 @@ sub render{
   my $count=0;
 
   $action=' action="'.$action.'" ' if ($action);
-  $action='' if (!$action);  
+  $action='' if (!$action);
   my $table_class='class="form_table"';
   $table_class= 'class="'.$self->{table_class}.'"' if ($self->{table_class});
   $table_class=$self->{table_attibutes} if ($self->{table_attibutes});
-  
+
     my $result='<form method=post '.$action.'enctype="multipart/form-data">';
     if ($view eq 'table'){ $result.='<table '.$table_class.'>'; }
-    
+
     foreach my $item(@{$self->{element}}) {
     my $name = $item->name;
 
@@ -333,14 +333,14 @@ sub submitted{
   my ($self) = @_;
   my $result='';
   my $set=0;
-  if ($self->{submit_value} ne '') {    
-    $result=$self->{submit_value};    
-    #$result=substr($result,length($self->{prefix})) if ($self->{prefix} ne'');    
-    
-    foreach my $item(@{$self->{constraints}}) {    
-      my $name=$item->{name};      
-      if ($item->check() == 0){ 
-        $self->{element_index}->{$name}->{error_message}= $item->message();        
+  if ($self->{submit_value} ne '') {
+    $result=$self->{submit_value};
+    #$result=substr($result,length($self->{prefix})) if ($self->{prefix} ne'');
+
+    foreach my $item(@{$self->{constraints}}) {
+      my $name=$item->{name};
+      if ($item->check() == 0){
+        $self->{element_index}->{$name}->{error_message}= $item->message();
         $set=1;
       }
     }
@@ -430,20 +430,20 @@ sub get_value{
 
 sub populate{
   my ($self, $data)=@_;
-  
+
   if (ref($data) eq 'HASH') {
-    while (my ($key, $value) = each %{ $data }){                
-           $self->{request}->{$self->{prefix}.$key}=$value;           
+    while (my ($key, $value) = each %{ $data }){
+           $self->{request}->{$self->{prefix}.$key}=$value;
     }
-  } else {  
+  } else {
     my @columns= $data->result_source->columns;
-    
+
     foreach my $item(keys %{$self->{element_index}}) {
-      $item=substr($item,length($self->{prefix})) if ($self->{prefix} ne'');      
-      if ( grep { $item eq $_ } @columns ) {        
+      $item=substr($item,length($self->{prefix})) if ($self->{prefix} ne'');
+      if ( grep { $item eq $_ } @columns ) {
          if (!$self->{request}->{$self->{prefix}.$item}) {
           $self->{request}->{$self->{prefix}.$item}=$data->get_column($item);
-         }       
+         }
       }
     }
   }
@@ -452,7 +452,7 @@ sub populate{
 sub serial_populate{
   my ($self, $data)=@_;
   my $result = {};
-  my @arr_data = split('&',$data);  
+  my @arr_data = split('&',$data);
   foreach (@arr_data) {
      my @tmp = split('=',$_);
      $self->{request}->{$self->{prefix}.$tmp[0]} = $tmp[1] if ($tmp[1]);
@@ -464,10 +464,22 @@ sub map_value{
   my $result;
 
   foreach my $item(keys %{$self->{element_index}}) {
-    $item=substr($item,length($self->{prefix})) if ($self->{prefix} ne'');    
-    
-    if ( grep { $item eq $_ } @columns ) {  
+    $item=substr($item,length($self->{prefix})) if ($self->{prefix} ne'');
+
+    if ( grep { $item eq $_ } @columns ) {
     	$result->{$item}=$self->get_value($item); }
+  }
+ return $result;
+}
+
+
+sub get_values{
+  my ($self)=@_;
+  my $result;
+
+  foreach my $item(keys %{$self->{element_index}}) {
+    $item=substr($item,length($self->{prefix})) if ($self->{prefix} ne'');
+    $result->{$item}=$self->get_value($item);
   }
  return $result;
 }
@@ -714,5 +726,3 @@ This library is free software, you can redistribute it and/or modify it under
 the same terms as Perl itself.
 
 =cut
-
-
