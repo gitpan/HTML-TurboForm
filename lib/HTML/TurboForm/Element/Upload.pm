@@ -9,16 +9,20 @@ sub new{
     my ($class, $request, $upload) = @_;
     my $self = $class->SUPER::new( $request );
     $self->upload( $upload );
-      
+
     my $pic='';
     $pic = $self->request->{$self->name} if ($self->request->{$self->name} );
     if ($self->request->{ $self->name.'_upload' }) {
-        my $cmd='cp '.$self->upload->tempname.' '.$self->savedir.'/'.$self->upload->basename;
-        system($cmd);
-        $pic = $self->savedir.'/'.$self->upload->basename;
+        if (-e $self->savedir.'/'.$self->upload->basename){
+            $pic='ERROR';
+        } else {
+            my $cmd='cp '.$self->upload->tempname.' '.$self->savedir.'/'.$self->upload->basename;
+            system($cmd);
+            $pic = $self->savedir.'/'.$self->upload->basename;
+        }
     }
     $self->{pic}=$pic;
-        
+
     return $self;
 }
 
@@ -40,7 +44,7 @@ sub render{
     $class=$self->{class}  if exists($self->{class});
     my $name=' name="'.$self->name.'_upload" ';
     my $checked='';
-    
+
     $disabled=' disabled ' if ($options->{frozen} == 1);
     if ($options->{frozen} != 1 ){
         $result.= $self->errormessage if ($self->{sizeerror} && $self->errormessage);
@@ -48,7 +52,10 @@ sub render{
         $result.='<input type="submit" class="form_upload_submit" value="'.$self->caption.'" name="'.$self->name.'_upload">';
     }
     if ($self->get_value() ne ''){
-        $result.='<input type="hidden" name="'.$self->name.'" value="'.$self->get_value().'">';
+
+         my @parts=split('/',$self->get_value());
+         my $f= pop(@parts);
+        $result.='<input type="hidden" name="'.$self->name.'" value="'.$self->get_value().'">File: '.$f;
     }
   return $self->vor($options).$result.$self->nach;
 }
@@ -80,5 +87,3 @@ returns HTML Code for select element.
 Thorsten Domsch, tdomsch@gmx.de
 
 =cut
-
-

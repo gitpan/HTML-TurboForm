@@ -4,7 +4,7 @@ use strict;
 use warnings;
 use UNIVERSAL::require;
 use YAML::Syck;
-our $VERSION='0.41';
+our $VERSION='0.42';
 
 sub new{
   my ($class, $r,$prefix)=@_;
@@ -292,23 +292,32 @@ sub render{
     if ($self->{element_index}->{$name}->{ignore} ne 'true'){
       $item->{table}=-1;
 
-      if ($item->type eq "TableEnd") {
-         $item->{table}=-1;
-         $table=-1;
+      if ($view eq 'flat'){
+          if ($item->type ne 'Submit'){
+              my $label = $item->get_label();
+              my $value = $item->get_value();
+              $result.='<span class="form_label">'.$label."</span>: ".$value."<br />";
+          }
+      } else {
+          if ($item->type eq "TableEnd") {
+             $item->{table}=-1;
+             $table=-1;
+          }
+          if ($item->type eq "Table") {
+             $item->{table}=$item->columns;
+             $item->{colcount}=-1;
+             $count=-1;
+             $table=$item->columns;
+          }
+          if ($table>-1) {
+             $count++;
+             $count=1 if ($count>$table);
+             $item->{colcount}=$count;
+             $item->{table}=$table;
+          }
+          $result .= $item->render($self->{element_index}->{$name}, $view);
       }
-      if ($item->type eq "Table") {
-         $item->{table}=$item->columns;
-         $item->{colcount}=-1;
-         $count=-1;
-         $table=$item->columns;
-      }
-      if ($table>-1) {
-         $count++;
-         $count=1 if ($count>$table);
-         $item->{colcount}=$count;
-         $item->{table}=$table;
-      }
-      $result .= $item->render($self->{element_index}->{$name}, $view);
+
       }
   else {
      $result.="<input type='hidden' name='$name' value='".$item->get_value()."'>";

@@ -193,6 +193,13 @@ sub nach{
     return $result;
 }
 
+sub get_label{
+    my ($self) = @_;
+    my $result='';
+    $result=$self->label if $self->label;
+    return $result;
+}
+
 sub get_value{
     my ($self) = @_;
     my $result='';
