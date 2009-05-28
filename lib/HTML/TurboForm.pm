@@ -4,7 +4,7 @@ use strict;
 use warnings;
 use UNIVERSAL::require;
 use YAML::Syck;
-our $VERSION='0.42';
+our $VERSION='0.43';
 
 sub new{
   my ($class, $r,$prefix)=@_;
@@ -60,7 +60,6 @@ sub load{
 
 sub unignore_all{
   my ($self ) = @_;
-
   my $k;
   my $v;
   foreach $k(keys %{ $self->{element_index} } ){

@@ -39,9 +39,12 @@ sub render{
     if ($self->options){
         my $optiontags ='';
 		my $first = '';
+
+
+
       	foreach my $key(sort keys %{$self->options}){
             my $value = $self->options->{$key};
-			
+
             my $values = $request->{ $self->name };
             $values = [ $values ] unless ref( $values ) =~ /ARRAY/;
             $checked='';
@@ -99,5 +102,3 @@ returns HTML Code for select element.
 Thorsten Domsch, tdomsch@gmx.de
 
 =cut
-
-

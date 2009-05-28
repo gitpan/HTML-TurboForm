@@ -1,8 +1,9 @@
 package HTML::TurboForm::Element::Radio;
 use warnings;
 use strict;
+use Tie::IxHash;
 use base qw(HTML::TurboForm::Element);
-__PACKAGE__->mk_accessors( qw/ class listmode pre post /);
+__PACKAGE__->mk_accessors( qw/ class special listmode pre post /);
 
 sub render{
     my ($self, $options, $view)=@_;
@@ -31,11 +32,38 @@ sub render{
         $post='</li>';
         $after='</ul>';
     }
-      
+
    $pre.=$self->pre if ($self->pre);
    $post.=$self->post if ($self->post);
 
+   my $norm_hash=1;
+   foreach (%{$self->options}){
+       $norm_hash=2 if (ref($_) eq 'HASH');
+   }
+
+    if ($norm_hash==2){
+       for my $k2 ( sort{ $a <=> $b} keys %{$self->options} ) {
+            while ( my( $key,$value) = each %{$self->options->{$k2}}){
+         my $values = $request->{ $self->name };
+         if (! $values){
+            $values = $self->default;
+         }
+
+         $values = [ $values ] unless ref( $values ) =~ /ARRAY/;
+         $checked='';
+         if ([ $values ]) { $checked=' checked ' if ( grep { $_ eq $value } @{ $values } ); }
+         my $special='';
+         #$special='<input type="text" '.$name.'>' if ($self->special==$k2);
+         $result.=$pre.'<input type="radio" '.$class.$checked.$disabled.$name.' value="'.$value.'">'.$key.$special.$post;
+         $result.='<input type="hidden" '.$name.' value="'.$value.'">' if (($disabled ne '')&& ( $checked ne ''));
+     }
+
+       }
+    } else {
+
     while ( my( $key,$value) = each %{$self->options}){
+#        if (ref($value) eq 'HASH'){ print "wkfndfkhvbkh";}
+
         my $values = $request->{ $self->name };
         if (! $values){
            $values = $self->default;
@@ -46,6 +74,7 @@ sub render{
         if ([ $values ]) { $checked=' checked ' if ( grep { $_ eq $value } @{ $values } ); }
         $result.=$pre.'<input type="radio" '.$class.$checked.$disabled.$name.' value="'.$value.'">'.$key.$post;
         $result.='<input type="hidden" '.$name.' value="'.$value.'">' if (($disabled ne '')&& ( $checked ne ''));
+    }
     }
 
    $result.=$after;
@@ -80,5 +109,3 @@ returns HTML Code for Radiobox.
 Thorsten Domsch, tdomsch@gmx.de
 
 =cut
-
-
