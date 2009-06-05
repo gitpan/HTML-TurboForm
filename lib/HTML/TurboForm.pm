@@ -4,7 +4,7 @@ use strict;
 use warnings;
 use UNIVERSAL::require;
 use YAML::Syck;
-our $VERSION='0.43';
+our $VERSION='0.45';
 
 sub new{
   my ($class, $r,$prefix)=@_;
@@ -437,21 +437,23 @@ sub get_value{
 }
 
 sub populate{
-  my ($self, $data)=@_;
+  my ($self, $data, $anyway)=@_;
 
-  if (ref($data) eq 'HASH') {
-    while (my ($key, $value) = each %{ $data }){
-           $self->{request}->{$self->{prefix}.$key}=$value;
-    }
-  } else {
-    my @columns= $data->result_source->columns;
+  if (($self->{submit_value} eq '') or ($anyway ne '')) {
+    if (ref($data) eq 'HASH') {
+      while (my ($key, $value) = each %{ $data }){
+             $self->{request}->{$self->{prefix}.$key}=$value;
+      }
+    } else {
+      my @columns= $data->result_source->columns;
 
-    foreach my $item(keys %{$self->{element_index}}) {
-      $item=substr($item,length($self->{prefix})) if ($self->{prefix} ne'');
-      if ( grep { $item eq $_ } @columns ) {
-         if (!$self->{request}->{$self->{prefix}.$item}) {
-          $self->{request}->{$self->{prefix}.$item}=$data->get_column($item);
-         }
+      foreach my $item(keys %{$self->{element_index}}) {
+        $item=substr($item,length($self->{prefix})) if ($self->{prefix} ne'');
+        if ( grep { $item eq $_ } @columns ) {
+           if (!$self->{request}->{$self->{prefix}.$item}) {
+            $self->{request}->{$self->{prefix}.$item}=$data->get_column($item);
+           }
+        }
       }
     }
   }
@@ -475,7 +477,8 @@ sub map_value{
     $item=substr($item,length($self->{prefix})) if ($self->{prefix} ne'');
 
     if ( grep { $item eq $_ } @columns ) {
-    	$result->{$item}=$self->get_value($item); }
+    	$result->{$item}=$self->get_value($item);
+    }
   }
  return $result;
 }

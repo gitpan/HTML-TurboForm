@@ -3,6 +3,7 @@ use warnings;
 use strict;
 use base qw(HTML::TurboForm::Element);
 use Imager;
+use File::Copy;
 __PACKAGE__->mk_accessors( qw/ prev upload maxsize keeporiginal savedir loadurl caption errormessage / );
 
 sub new{
@@ -16,8 +17,7 @@ sub new{
         if (-e $self->savedir.'/'.$self->upload->basename){
             $pic='ERROR';
         } else {
-            my $cmd='cp '.$self->upload->tempname.' '.$self->savedir.'/'.$self->upload->basename;
-            system($cmd);
+            copy($self->upload->tempname,$self->savedir.'/'.$self->upload->basename) or die "Copy failed: $!";
             $pic = $self->savedir.'/'.$self->upload->basename;
         }
     }
@@ -29,7 +29,11 @@ sub new{
 sub get_value{
     my ($self) = @_;
     my $result='';
+     my $request=$self->request;
     $result=$self->{pic} if ($self->{pic});
+   if (!$self->{pic}){
+         $result=$request->{$self->name} if ($request->{$self->name});
+    }
     return $result;
 }
 

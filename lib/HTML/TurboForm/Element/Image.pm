@@ -24,32 +24,27 @@ sub do_img{
                 #$c->stash->{ 'error' } = 'Filetype not supported!';
         } else {
             # read image
-            my $image = Imager->new;                        
+            my $image = Imager->new;
             $self->{sizeerror}=0;
             if ($self->maxsize) {
-                if (($self->upload->size/1024) > $self->maxsize){                    
+                if (($self->upload->size/1024) > $self->maxsize){
                     $self->{sizeerror}=1;
                 }
-            }            
+            }
             if (!$self->{sizeerror}){
                 if( $image->read( file => $self->upload->tempname ) ) {
                     # remove alpha channels because jpg does not support it  # and its not used anyways
                     $image = $image->convert( preset => 'noalpha' );
                     #attribute keeporignal isparams local path for storing orig sized images
-    
+
                     my $tmp = File::Temp->new( DIR => $self->savedir.'', UNLINK => 0, SUFFIX => '.jpg' );
                     $pic = substr( $tmp, length( $self->savedir )+1 );
                     $self->{pic}=$pic;
-    
+
                     if ($self->keeporiginal){
                         $self->upload->copy_to($self->keeporiginal.'/orig_'.$pic);
-                        #$image->write(
-                        #        file        => $self->keeporiginal.'/orig_'.$pic,
-                        #        type        => 'jpeg',
-                        #        jpegquality => 90
-                        #);
-                    }              
-                    
+                    }
+
                     # if there is a save dir, resize. depending if width and/or height is given, scale to dimensions
                     if ($self->savedir){
                         if (($self->width) and ($self->height)) {
@@ -62,13 +57,13 @@ sub do_img{
                             # Resize height, scale width
                             $image = $image->scale(ypixels=>$self->height);
                         }
-                                                
+
                         $image->write(
                             file        => $self->savedir.'/med_'.$pic,
                             type        => 'jpeg',
                             jpegquality => 90
                         );
-    
+
                         if ($self->thumbnail) {
                             if ($self->thumbnail->{width} || $self->thumbnail->{height} ) {
                                 if (($self->thumbnail->{width}) and ($self->thumbnail->{height})) {
@@ -104,7 +99,7 @@ sub get_value{
     my $request=$self->request;
     $result=$self->{pic};
     if (!$self->{pic}){
-         $result=$request->{$self->name} if ($request->{$self->name});    
+         $result=$request->{$self->name} if ($request->{$self->name});
     }
     return $result;
 }
@@ -120,9 +115,9 @@ sub render{
     $class=$self->{class}  if exists($self->{class});
     my $name=' name="'.$self->name.'_upload" ';
     my $checked='';
-    my $pic='';    
+    my $pic='';
     $pic= $self->{pic} if ($self->{pic});
-    $pic=$request->{$self->name} if ($request->{$self->name});    
+    $pic=$request->{$self->name} if ($request->{$self->name});
     $disabled=' disabled ' if ($options->{frozen} == 1);
     if ($options->{frozen} != 1 ){
         $result.= $self->errormessage if ($self->{sizeerror} && $self->errormessage);
@@ -166,5 +161,3 @@ returns HTML Code for select element.
 Thorsten Domsch, tdomsch@gmx.de
 
 =cut
-
-
