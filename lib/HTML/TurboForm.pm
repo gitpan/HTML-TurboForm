@@ -4,7 +4,7 @@ use strict;
 use warnings;
 use UNIVERSAL::require;
 use YAML::Syck;
-our $VERSION='0.45';
+our $VERSION='0.46';
 
 sub new{
   my ($class, $r,$prefix)=@_;
@@ -472,12 +472,13 @@ sub serial_populate{
 sub map_value{
   my ($self, @columns)=@_;
   my $result;
-
   foreach my $item(keys %{$self->{element_index}}) {
     $item=substr($item,length($self->{prefix})) if ($self->{prefix} ne'');
-
-    if ( grep { $item eq $_ } @columns ) {
-    	$result->{$item}=$self->get_value($item);
+    my $type=$self->{element}[$self->{element_index}->{$self->{prefix}.$item}->{index}]->type;
+    if (($type ne 'Upload')&&($type ne 'Image')){
+      if ( grep { $item eq $_ } @columns ) {    
+          $result->{$item}=$self->get_value($item);
+      }
     }
   }
  return $result;

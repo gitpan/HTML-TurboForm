@@ -4,7 +4,8 @@ use strict;
 use base qw(HTML::TurboForm::Element);
 use Imager;
 use File::Copy;
-__PACKAGE__->mk_accessors( qw/ prev upload maxsize keeporiginal savedir loadurl caption errormessage / );
+use File::Path;
+__PACKAGE__->mk_accessors( qw/ prev upload maxsize keeporiginal savedir loadurl filedir caption overwrite errormessage / );
 
 sub new{
     my ($class, $request, $upload) = @_;
@@ -13,11 +14,17 @@ sub new{
 
     my $pic='';
     $pic = $self->request->{$self->name} if ($self->request->{$self->name} );
+    if (!$self->filedir){
+        $self->filedir('');
+    } else {        
+        mkpath($self->savedir.'/'.$self->filedir);        
+        $self->filedir($self->filedir.'/') if ($self->filedir!~/(.*)\/$/);
+    }    
     if ($self->request->{ $self->name.'_upload' }) {
-        if (-e $self->savedir.'/'.$self->upload->basename){
+        if ((-e $self->savedir.'/'.$self->filedir.$self->upload->basename)&&(!$self->overwrite)){
             $pic='ERROR';
         } else {
-            copy($self->upload->tempname,$self->savedir.'/'.$self->upload->basename) or die "Copy failed: $!";
+            copy($self->upload->tempname,$self->savedir.'/'.$self->filedir.$self->upload->basename) or die "Copy failed: $!";
             $pic = $self->savedir.'/'.$self->upload->basename;
         }
     }
