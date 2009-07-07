@@ -4,7 +4,7 @@ use strict;
 use warnings;
 use UNIVERSAL::require;
 use YAML::Syck;
-our $VERSION='0.46';
+our $VERSION='0.48';
 
 sub new{
   my ($class, $r,$prefix)=@_;
@@ -122,7 +122,7 @@ sub add_element{
   $self->{element_index}->{$name}->{error_message}='';
 
   if ($params->{type} eq 'Submit') {
-    if ( exists $self->{request}->{$name } ){
+    if (( exists $self->{request}->{$name.".x"} )or(exists $self->{request}->{$name})){
       $self->{submitted}=1 ;
       $self->{submit_value} = $namew;
     }

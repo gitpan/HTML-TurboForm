@@ -36,31 +36,51 @@ sub render{
 
     $result.='<select class="'.$class.'" '.$self->get_attr().$disabled.$id.$name.'>';
     my $result2='';
-    if ($self->options){
+    if (($self->options)or ($self->optionsnum)){
         my $optiontags ='';
-		my $first = '';
+	my $first = '';
+	    
+	if ($self->optionsnum){	    
+	    foreach (@{$self->optionsnum}){
+		while( my ($key, $value) = each %$_ ) {
+		    my $values = $request->{ $self->name };
+		    $values = [ $values ] unless ref( $values ) =~ /ARRAY/;
+		    $checked='';
+		    if ( @{ $values } && $value) {
+			if ( grep { $_ eq $value } @{ $values } ){ $checked=' selected '; }
+		    }
+		    if ($value ne $self->first){
+			$optiontags.='<option '.$checked.' value="'.$value.'">'.$key.'</option>';
+		    } else {
+			$first =  '<option '.$checked.' value="'.$value.'">'.$key.'</option>';
+		    }
+		    $result2.='<input type="hidden" '.$id.$name.' value="'.$value.'">' if (($disabled ne '')&& ( $checked ne ''));
+		}
+	    }
+	}
 
-
-
-      	foreach my $key(sort keys %{$self->options}){
-            my $value = $self->options->{$key};
-
-            my $values = $request->{ $self->name };
-            $values = [ $values ] unless ref( $values ) =~ /ARRAY/;
-            $checked='';
-            if ( @{ $values } && $value) {
-                if ( grep { $_ eq $value } @{ $values } ){
-                    $checked=' selected ';
-                }
-            }
-			if ($value ne $self->first){
-                $optiontags.='<option '.$checked.' value="'.$value.'">'.$key.'</option>';
-			} else {
-				$first =  '<option '.$checked.' value="'.$value.'">'.$key.'</option>';
-			}
-            $result2.='<input type="hidden" '.$id.$name.' value="'.$value.'">' if (($disabled ne '')&& ( $checked ne ''));
-        }
-		$result .= $first.$optiontags;
+        if ($self->options){
+	    foreach my $key(sort keys %{$self->options}){
+		my $value = $self->options->{$key};
+    
+		my $values = $request->{ $self->name };
+		$values = [ $values ] unless ref( $values ) =~ /ARRAY/;
+		$checked='';
+		if ( @{ $values } && $value) {
+		    if ( grep { $_ eq $value } @{ $values } ){
+			$checked=' selected ';
+		    }
+		}
+		if ($value ne $self->first){
+		    $optiontags.='<option '.$checked.' value="'.$value.'">'.$key.'</option>';
+		} else {
+		    $first =  '<option '.$checked.' value="'.$value.'">'.$key.'</option>';
+		}
+		$result2.='<input type="hidden" '.$id.$name.' value="'.$value.'">' if (($disabled ne '')&& ( $checked ne ''));
+	    }
+	}
+	
+	$result .= $first.$optiontags;
     }
     $result.='</select>';
   return $self->vor($options).$result.$result2.$self->nach if ($self->{pure});
