@@ -22,9 +22,11 @@ sub render{
 
   my $value=$self->value;
   $value= ' value="'.$value.'" ';
-
-  if ($options->{frozen} == 1) {
-    my $text= $value;
+  
+  if ($options->{frozen}){
+    if ($options->{frozen} == 1) {
+      my $text= $value;
+    }
   }
   
   my $js_tag_text = '';

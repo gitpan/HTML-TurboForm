@@ -4,7 +4,7 @@ use strict;
 use warnings;
 use UNIVERSAL::require;
 use YAML::Syck;
-our $VERSION='0.48';
+our $VERSION='0.49';
 
 sub new{
   my ($class, $r,$prefix)=@_;
@@ -275,7 +275,7 @@ sub render{
 
   my $table=-1;
   my $count=0;
-
+  $view='' if (!$view);
   $action=' action="'.$action.'" ' if ($action);
   $action='' if (!$action);
   my $table_class='class="form_table"';
@@ -283,6 +283,7 @@ sub render{
   $table_class=$self->{table_attibutes} if ($self->{table_attibutes});
 
     my $result='<form method=post '.$action.'enctype="multipart/form-data">';
+    
     if ($view eq 'table'){ $result.='<table '.$table_class.'>'; }
 
     foreach my $item(@{$self->{element}}) {
@@ -291,6 +292,7 @@ sub render{
     if ($self->{element_index}->{$name}->{ignore} ne 'true'){
       $item->{table}=-1;
 
+   
       if ($view eq 'flat'){
           if ($item->type ne 'Submit'){
               my $label = $item->get_label();

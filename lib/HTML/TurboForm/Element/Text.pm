@@ -15,11 +15,13 @@ sub render {
   my $name=' name="'.$self->name.'" ';
   my $value='';
   $value=' value="'.$request->{ $self->name }.'" ' if ($request->{ $self->name });
-
-  if ($options->{frozen} eq 1) {
-    my $text= $value;
-    $disabled=' disabled ';
-    $result='<input type="hidden" '.$name.$value.'" />';
+  
+  if ($options->{frozen}) {
+    if ($options->{frozen} eq 1) {
+      my $text= $value;
+      $disabled=' disabled ';
+      $result='<input type="hidden" '.$name.$value.'" />';
+    }
   }
 
   my $limit='';

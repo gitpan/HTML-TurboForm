@@ -25,11 +25,13 @@ sub render {
   $class = 'class="'.$class.'"';
   my $name=' name="'.$self->name.'" ';
   my $value=$request->{ $self->name };
-
-  if ($options->{frozen} == 1) {
-    my $text= $value;
-    $disabled=' disabled ';
-    $result='<input type="hidden" '.$name.' value="'.$value.'" />';
+  
+  if ($options->{frozen}) {
+      if ($options->{frozen} == 1) {
+	  my $text= $value;
+          $disabled=' disabled ';
+	  $result='<input type="hidden" '.$name.' value="'.$value.'" />';
+      }
   }
 
   my $tinytext='';
@@ -42,7 +44,8 @@ sub render {
 	   });
       </script>';
   }
-
+  
+  $value='' if (!$value);
   $result =$result.$tinytext.'<textarea '.$disabled.$id.$name.$class.'>'.$value.'</textarea>' ;
   return $self->vor($options).$result.$self->nach;
 }

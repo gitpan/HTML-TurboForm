@@ -131,10 +131,16 @@ sub vor{
 
     if ($self->{view} eq '') {
         $error="<div class='form_error'>$error</div>" if ($error ne '');
-
+        
+        $self->label('') if (!$self->label);
         $result=$table."<div ".$class.$rwc.">".$error.
                        "<div class='form_left'".$ltc.">".$self->label."</div>".
                        "<div class='form_right'".$rtc.">";
+		       
+#$result=$table."<div ".$class.$rwc.">".$error.
+#                       "<div class='form_left'".$ltc.">".$self->label."</div>".
+#                       "<div class='form_right'".$rtc.">";		       
+		       
         $result=$table."<div ".$class.$rwc.">" if ($self->type eq "Html");
     }
 

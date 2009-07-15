@@ -21,7 +21,9 @@ sub render{
     if ($self->{submitted} == 0){
     	$request->{ $self->name } = $self->default if($self->default);
     }
-    $disabled=' disabled ' if ($options->{frozen} == 1);
+    if ($options->{frozen}){
+        $disabled=' disabled ' if ($options->{frozen} == 1);
+    }
 
     if ($self->dbdata and $self->dbid and $self->dblabel){
        my @t = @{ $self->dbdata };
@@ -62,15 +64,17 @@ sub render{
         if ($self->options){
 	    foreach my $key(sort keys %{$self->options}){
 		my $value = $self->options->{$key};
-    
+                $value="" if (!$value);
 		my $values = $request->{ $self->name };
 		$values = [ $values ] unless ref( $values ) =~ /ARRAY/;
 		$checked='';
-		if ( @{ $values } && $value) {
-		    if ( grep { $_ eq $value } @{ $values } ){
-			$checked=' selected ';
+		if (@{ $values } && $value) {
+		    foreach (@{$values}){
+		        #if ( grep { $_ eq $value } @{ $values } ){
+		        if ($_){ $checked=' selected ' if $_ eq $value; }
 		    }
 		}
+		$self->first('') if (!$self->first);
 		if ($value ne $self->first){
 		    $optiontags.='<option '.$checked.' value="'.$value.'">'.$key.'</option>';
 		} else {
