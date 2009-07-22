@@ -4,7 +4,7 @@ use strict;
 use warnings;
 use UNIVERSAL::require;
 use YAML::Syck;
-our $VERSION='0.51';
+our $VERSION='0.52';
 
 sub new{
   my ($class, $r,$prefix)=@_;
@@ -48,21 +48,30 @@ sub add_uploads{
 }
 
 sub build_form{
-    my ($self, $data, @columns)=@_;
+    my ($self, $data, $resultsource)=@_;
     
-    use Data::Dumper;
+    my @columns=$resultsource->columns;
+    
     foreach (@columns){
-        #print Dumper($_);
+        my $info=$resultsource->column_info($_);
+        my $label=$_;        
+        $label=$info->{label} if $info->{label};        
         my $type='Text';
-        
+        $type=$info->{formtype} if $info->{formtype};        
+        my $args={ type=>$type, name=> $_, label=> $label };        
         if ($data->{$_}) {
-          
+           while(my($key, $value) = each(%{$data->{$_}})){
+               $args->{$key}=$value if ($key ne 'name');
+           }
+        }        
+        my $k=$_;
+        my $forbidden=0;
+        if ($data->{forbidden}){
+            foreach (@{$data->{forbidden}}){ $forbidden=1 if ($_ eq $k); }
         }
-        $self->add_element({ type=>$type, name=> $_, label=> $_ });      
+        $self->add_element($args) if $forbidden == 0;      
     }
 }
-
-
 
 sub load{
     my ($self,$fn)=@_;
