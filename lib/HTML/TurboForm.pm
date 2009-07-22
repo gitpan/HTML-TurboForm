@@ -4,7 +4,7 @@ use strict;
 use warnings;
 use UNIVERSAL::require;
 use YAML::Syck;
-our $VERSION='0.50';
+our $VERSION='0.51';
 
 sub new{
   my ($class, $r,$prefix)=@_;
@@ -35,7 +35,6 @@ sub add_modules{
 
 sub add_constraint{
   my ($self, $params) = @_;
-
   my $name= $self->{prefix}.$params->{name};
   $params->{request}=$self->{request};
   my $class_name = "HTML::TurboForm::Constraint::" . $params->{ type };
@@ -47,6 +46,23 @@ sub add_uploads{
   my ($self, $uploads) = @_;
   $self->{uploads} = $uploads;
 }
+
+sub build_form{
+    my ($self, $data, @columns)=@_;
+    
+    use Data::Dumper;
+    foreach (@columns){
+        #print Dumper($_);
+        my $type='Text';
+        
+        if ($data->{$_}) {
+          
+        }
+        $self->add_element({ type=>$type, name=> $_, label=> $_ });      
+    }
+}
+
+
 
 sub load{
     my ($self,$fn)=@_;

@@ -6,6 +6,10 @@ use base qw(HTML::TurboForm::Element);
 sub render {
   my ($self, $options, $view)=@_;
   if ($view) { $self->{view}=$view; }
+  
+  my $id='';
+  $id=' id="'.$self->id.'" '  if ($self->id);
+  
   my $request=$self->request;
   my $result='';
   my $disabled='';
@@ -27,7 +31,7 @@ sub render {
   my $limit='';
   $limit=' maxlength="'.$self->limit.'"' if ($self->limit);
 
-  $result .='<input type="'.$self->type.'"'.$disabled.$name.$value.$class.$limit.'/>' ;
+  $result .='<input type="'.$self->type.'"'.$disabled.$id.$name.$value.$class.$limit.'/>' ;
   return $self->vor($options).$result.$self->nach;
 }
 

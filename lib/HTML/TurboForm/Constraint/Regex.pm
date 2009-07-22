@@ -13,10 +13,7 @@ sub check{
   
   my $value=$request->{$self->{name}};
   return 1 if (!$value);
-
-  if ($regex){      
-      return 1 if( $value =~ qr/$regex/ );
-  }
+  if ($regex){ return 1 if( $value =~ qr/$regex/ ); }
   return 0;  
 }
 
