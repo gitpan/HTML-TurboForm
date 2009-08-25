@@ -29,6 +29,7 @@ lib/HTML/TurboForm/Element/Date.pm
 lib/HTML/TurboForm/Element/Hidden.pm
 lib/HTML/TurboForm/Element/Html.pm
 lib/HTML/TurboForm/Element/Image.pm
+lib/HTML/TurboForm/Element/Imageupload.pm
 lib/HTML/TurboForm/Element/Imagegalerie.pm
 lib/HTML/TurboForm/Element/Imageslider.pm
 lib/HTML/TurboForm/Element/Radio.pm

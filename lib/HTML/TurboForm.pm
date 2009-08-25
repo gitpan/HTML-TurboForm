@@ -4,13 +4,14 @@ use strict;
 use warnings;
 use UNIVERSAL::require;
 use YAML::Syck;
-our $VERSION='0.52';
+our $VERSION='0.53';
 
 sub new{
   my ($class, $r,$prefix)=@_;
   my $self = {};
   $self->{request}= $r;
   $self->{submitted} = 0;
+  $self->{after_upload}='';
   $self->{submit_value} = '';
   $self->{count}=0;
   $self->{submit_id} = -1;
@@ -48,16 +49,18 @@ sub add_uploads{
 }
 
 sub build_form{
-    my ($self, $data, $resultsource)=@_;
+    my ($self, $data, $resultsource, $options)=@_;
     
     my @columns=$resultsource->columns;
-    
+        
     foreach (@columns){
+        my $forbidden=0;
         my $info=$resultsource->column_info($_);
+        
         my $label=$_;        
         $label=$info->{label} if $info->{label};        
         my $type='Text';
-        $type=$info->{formtype} if $info->{formtype};        
+        $type=$info->{fieldtype} if $info->{formtype};        
         my $args={ type=>$type, name=> $_, label=> $label };        
         if ($data->{$_}) {
            while(my($key, $value) = each(%{$data->{$_}})){
@@ -65,8 +68,19 @@ sub build_form{
            }
         }        
         my $k=$_;
-        my $forbidden=0;
-        if ($data->{forbidden}){
+        if ($options->{definedonly}){
+        if ($options->{definedonly} eq '1'){
+        } else{
+           my $number =    keys %$info;    
+           $forbidden=1  if ($number==0);
+        }
+        } else{
+          my $number =    keys %$info;    
+           $forbidden=1  if ($number==0);          
+        }
+        
+        if (($data->{forbidden})&&($forbidden==0)){
+        #if ($data->{forbidden}){
             foreach (@{$data->{forbidden}}){ $forbidden=1 if ($_ eq $k); }
         }
         $self->add_element($args) if $forbidden == 0;      
@@ -156,6 +170,13 @@ sub add_element{
   $self->{element_index}->{$name}->{frozen}=0;
   $self->{element_index}->{$name}->{ignore}='false';
   $self->{element_index}->{$name}->{error_message}='';
+  
+  if ($params->{type} eq 'Imageupload') {    
+    if ( exists $self->{uploads}->{$name."_upload"} ){   
+        $self->{after_upload}=$name;        
+        $element->do_img();   
+    }
+  }     
 
   if ($params->{type} eq 'Submit') {
     if (( exists $self->{request}->{$name.".x"} )or(exists $self->{request}->{$name})){
@@ -229,8 +250,8 @@ sub find_action{
 }
 
 sub do{
-  my ($self, $name, $fn)=@_;
-  $self->{element}[$self->{element_index}->{$self->{prefix}.$name}->{index}]->$fn();
+  my ($self, $name, $fn,@args)=@_;
+  $self->{element}[$self->{element_index}->{$self->{prefix}.$name}->{index}]->$fn(@args);
 }
 
 sub get_javascript{
@@ -364,6 +385,14 @@ sub render{
   if ($view eq 'table'){ $result.='</table>'; }
   #if ($view eq 'clean'){ }
   return $result.'</form>';
+}
+
+
+sub uploaded{
+  my ($self) = @_;
+  
+  return $self->{after_upload} if ($self->{after_upload} ne '');    
+  return '';
 }
 
 sub submit{

@@ -9,7 +9,7 @@ sub check{
   my $request=$self->request;
   my $result=0;
   my $empty = '';
-  $empty=$self->emptyval if ($self->emptyval);
+  $empty=$self->emptyval if ($self->emptyval);  
   if (exists($request->{$self->{name}})) {
     $result=1 if ($request->{$self->{name}} ne $empty );    
   }  

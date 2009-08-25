@@ -27,7 +27,8 @@ sub render{
     foreach (@{$self->{options}}){
     	my $col_fn = $self->dbid;
     	my $col_label = $self->dblabel;
-    	my $fn = $_->$col_fn;
+	    my $fn ='';
+    	$fn = $_->$col_fn if ($_->$col_fn);
 
     	if (!$self->noimgs){
 	    	if ($self->all_link){
