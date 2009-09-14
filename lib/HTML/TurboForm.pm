@@ -4,7 +4,7 @@ use strict;
 use warnings;
 use UNIVERSAL::require;
 use YAML::Syck;
-our $VERSION='0.53';
+our $VERSION='0.54';
 
 sub new{
   my ($class, $r,$prefix)=@_;
@@ -60,7 +60,7 @@ sub build_form{
         my $label=$_;        
         $label=$info->{label} if $info->{label};        
         my $type='Text';
-        $type=$info->{fieldtype} if $info->{formtype};        
+        $type=$info->{fieldtype} if $info->{fieldtype};        
         my $args={ type=>$type, name=> $_, label=> $label };        
         if ($data->{$_}) {
            while(my($key, $value) = each(%{$data->{$_}})){
