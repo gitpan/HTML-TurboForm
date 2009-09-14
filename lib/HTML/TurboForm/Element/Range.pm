@@ -9,26 +9,16 @@ sub init{
     my ($self)=@_;
 
     my $step = 10;
-
-    if ($self->min) {
-        $self->{min}=int($self->min);
-    };
-
-    if ($self->max) {
-        $self->{max}= int( $self->max );
-        $self->{max}++ if ($self->round);
-    };
-
+    if ($self->min) { $self->{min}=int($self->min); };
+    if ($self->max) {  $self->{max}= int( $self->max );  };
     if ($self->start1)  { $self->{start1}=$self->start1; };
     if ($self->start2)  { $self->{start2}=$self->start2; };
 
     $self->{value}='';
     my $js_min='';
 	my $js_max='';
-    if($self->zerovalue){
-        $self->{min}-- ;
-        $self->{start1}=$self->{min};
-        $self->{max}++ ;
+    if($self->zerovalue){        
+        $self->{start1}=$self->{min};        
         $self->{start2}=$self->{max};
         $js_min ='if (value1 == '.$self->{min}.') $("#'.$self->name.'_label1").html("'.$self->zerovalue.'");';
         $js_max ='if (value2 == '.$self->{max}.') $("#'.$self->name.'_label2").html("'.$self->zerovalue.'");';

@@ -4,7 +4,7 @@ use strict;
 use warnings;
 use UNIVERSAL::require;
 use YAML::Syck;
-our $VERSION='0.54';
+our $VERSION='0.55';
 
 sub new{
   my ($class, $r,$prefix)=@_;
