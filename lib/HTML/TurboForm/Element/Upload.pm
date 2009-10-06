@@ -2,7 +2,6 @@ package HTML::TurboForm::Element::Upload;
 use warnings;
 use strict;
 use base qw(HTML::TurboForm::Element);
-use Imager;
 use File::Copy;
 use File::Path;
 __PACKAGE__->mk_accessors( qw/ prev upload maxsize keeporiginal savedir loadurl filedir caption overwrite errormessage / );
@@ -23,8 +22,8 @@ sub new{
     if ($self->request->{ $self->name.'_upload' }) {
         if ((-e $self->savedir.'/'.$self->filedir.$self->upload->basename)&&(!$self->overwrite)){
             $pic='ERROR';
-        } else {
-            copy($self->upload->tempname,$self->savedir.'/'.$self->filedir.$self->upload->basename) or die "Copy failed: $!";
+        } else {            
+            move($self->upload->tempname,$self->savedir.'/'.$self->filedir.$self->upload->basename);
             $pic = $self->savedir.'/'.$self->upload->basename;
         }
     }
@@ -60,10 +59,9 @@ sub render{
     if ($options->{frozen} != 1 ){
         $result.= $self->errormessage if ($self->{sizeerror} && $self->errormessage);
         $result.='<input type="file" class="'.$class.'" '.$self->get_attr().$disabled.$name.'>';
-        $result.='<input type="submit" class="form_upload_submit" value="'.$self->caption.'" name="'.$self->name.'_upload">';
+        $result.='<input type="submit" class="form_upload_submit" value="'.$self->caption.'" name="'.$self->name.'_submit">';
     }
     if ($self->get_value() ne ''){
-
          my @parts=split('/',$self->get_value());
          my $f= pop(@parts);
         $result.='<input type="hidden" name="'.$self->name.'" value="'.$self->get_value().'">File: '.$f;

@@ -4,7 +4,9 @@ use strict;
 use warnings;
 use UNIVERSAL::require;
 use YAML::Syck;
-our $VERSION='0.55';
+our $VERSION='0.57';
+
+use File::Copy;
 
 sub new{
   my ($class, $r,$prefix)=@_;
@@ -192,7 +194,9 @@ sub add_element{
     }
   }
 
-  if ($params->{type} eq 'Image') {
+  if (($params->{type} eq 'Image')||($params->{type} eq 'Upload')) {
+    
+    
     if ( exists $self->{request}->{$name.'_submit' } ){
       $self->{submitted}=1 ;
       $self->{submit_value} = $namew.'_uploaded';
@@ -347,37 +351,34 @@ sub render{
     my $name = $item->name;
 
     if ($self->{element_index}->{$name}->{ignore} ne 'true'){
-      $item->{table}=-1;
-
-   
-      if ($view eq 'flat'){
-          if ($item->type ne 'Submit'){
-              my $label = $item->get_label();
-              my $value = $item->get_value();
-              $result.='<span class="form_label">'.$label."</span>: ".$value."<br />";
-          }
+        $item->{table}=-1;
+       
+        if ($view eq 'flat'){
+            if ($item->type ne 'Submit'){
+                my $label = $item->get_label();
+                my $value = $item->get_value();
+                $result.='<span class="form_label">'.$label."</span>: ".$value."<br />";
+            }
+        } else {
+            if ($item->type eq "TableEnd") {
+                $item->{table}=-1;
+                $table=-1;
+            }
+            if ($item->type eq "Table") {
+                $item->{table}=$item->columns;
+                $item->{colcount}=-1;
+                $count=-1;
+                $table=$item->columns;
+            }
+            if ($table>-1) {
+                $count++;
+                $count=1 if ($count>$table);
+                $item->{colcount}=$count;
+                $item->{table}=$table;
+            }
+            $result .= $item->render($self->{element_index}->{$name}, $view);
+         }
       } else {
-          if ($item->type eq "TableEnd") {
-             $item->{table}=-1;
-             $table=-1;
-          }
-          if ($item->type eq "Table") {
-             $item->{table}=$item->columns;
-             $item->{colcount}=-1;
-             $count=-1;
-             $table=$item->columns;
-          }
-          if ($table>-1) {
-             $count++;
-             $count=1 if ($count>$table);
-             $item->{colcount}=$count;
-             $item->{table}=$table;
-          }
-          $result .= $item->render($self->{element_index}->{$name}, $view);
-      }
-
-      }
-  else {
      $result.="<input type='hidden' name='$name' value='".$item->get_value()."'>";
   }
 }
@@ -411,7 +412,6 @@ sub submitted{
   if ($self->{submit_value} ne '') {
     $result=$self->{submit_value};
     #$result=substr($result,length($self->{prefix})) if ($self->{prefix} ne'');
-
     foreach my $item(@{$self->{constraints}}) {
       my $name=$item->{name};
       if ($item->check() == 0){

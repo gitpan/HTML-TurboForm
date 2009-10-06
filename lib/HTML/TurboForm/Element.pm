@@ -194,7 +194,6 @@ sub nach{
 	if ($self->wrapper){
 		$result=$self->{after_wrap} if ($self->{after_wrap});
 	}
-
     $result.="\n";
     return $result;
 }
