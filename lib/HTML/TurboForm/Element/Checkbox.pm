@@ -49,7 +49,7 @@ sub render{
         $values = [ $values ] unless ref( $values ) =~ /ARRAY/;
         $checked='';
         if ([ $values]){ $checked=' checked ' if ( grep { $_ eq $value } @{ $values } ); }
-        $result.=$pre.'<input type="checkbox" '.$class.$checked.$disabled.$name.' value="'.$value.'">'.$key.$post;
+        $result.=$pre.'<input type="checkbox" '.$class.$checked.$disabled.$name.' rel="'.lc($key).'" value="'.$value.'">'.$key.$post;
         $result.='<input type="hidden" '.$name.' value="'.$value.'">' if (($disabled ne '')&& ( $checked ne ''));
         $result.='<br />' if($self->tablelayout);
     }
