@@ -1,8 +1,9 @@
 package HTML::TurboForm::Element::Captcha;
 use warnings;
 use strict;
+use Crypt::Lite;
 use base qw(HTML::TurboForm::Element);
-__PACKAGE__->mk_accessors( qw/ session length/ );
+__PACKAGE__->mk_accessors( qw/ session length keyname keyphrase/ );
 
 sub render {
   my ($self, $options, $view)=@_;
@@ -30,21 +31,35 @@ sub render {
     my $x = int(rand(scalar(@numbers)));
     $random .= $x;
   }
-
+  my $k='_captcha';
+  $k=$self->keyname if ($self->keyname);  
+  
   $result=$self->print_number($random);
+  
+  if ($self->keyphrase){
+      my $crypt = Crypt::Lite->new( debug => 0, encoding => 'hex8' );
+	  $random=$crypt->encrypt($random,$self->keyphrase);      
+  }
+  
   if ($self->session && $self->name){
-    $self->session->{ $self->name."_captcha"}=$random;
+    $self->session->{ $self->name.$k}=$random;
   }
   $self->{value}=$random;
-
  # $result .='<input class="form_std" type="'.$self->type.'"'.$disabled.$name.$class.$value.'>' ;
   return $self->vor($options).$result.$self->nach;
 }
 
-
 sub get_value{
   my ($self)=@_;
-  return  $self->session->{ $self->name."_captcha"};
+  my $k='_captcha';
+  $k=$self->keyname if ($self->keyname);
+  my $val=$self->session->{ $self->name.$k };
+  
+  if ($self->keyphrase){
+      my $crypt = Crypt::Lite->new( debug => 0, encoding => 'hex8' );
+	  $val=$crypt->decrypt($val,$self->keyphrase);
+  }  
+  return  $val;
 }
 
 sub get_digit_matrix{

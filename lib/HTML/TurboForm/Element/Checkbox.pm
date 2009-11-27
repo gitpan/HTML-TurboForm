@@ -48,8 +48,10 @@ sub render{
         my $values = $request->{ $self->name };
         $values = [ $values ] unless ref( $values ) =~ /ARRAY/;
         $checked='';
-        if ([ $values]){ $checked=' checked ' if ( grep { $_ eq $value } @{ $values } ); }
+        if ([ $values]){ $checked=' checked ' if ( grep { $_ eq $value if ($_) } @{ $values } ); }
+        
         $result.=$pre.'<input type="checkbox" '.$class.$checked.$disabled.$name.' rel="'.lc($key).'" value="'.$value.'">'.$key.$post;
+        
         $result.='<input type="hidden" '.$name.' value="'.$value.'">' if (($disabled ne '')&& ( $checked ne ''));
         $result.='<br />' if($self->tablelayout);
     }

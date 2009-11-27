@@ -3,7 +3,7 @@ use warnings;
 use strict;
 use Tie::IxHash;
 use base qw(HTML::TurboForm::Element);
-__PACKAGE__->mk_accessors( qw/ class special listmode pre post /);
+__PACKAGE__->mk_accessors( qw/ class special listmode pre post position labelclass/);
 
 sub render{
     my ($self, $options, $view)=@_;
@@ -37,10 +37,11 @@ sub render{
    $post.=$self->post if ($self->post);
 
    my $norm_hash=1;
-   foreach (%{$self->options}){
-       $norm_hash=2 if (ref($_) eq 'HASH');
-   }
-
+   if ($self->options){
+       foreach (%{$self->options}){
+           $norm_hash=2 if (ref($_) eq 'HASH');
+       }
+   
     if ($norm_hash==2){
        for my $k2 ( sort{ $a <=> $b} keys %{$self->options} ) {
             while ( my( $key,$value) = each %{$self->options->{$k2}}){
@@ -59,22 +60,50 @@ sub render{
      }
 
        }
-    } else {
-
-    while ( my( $key,$value) = each %{$self->options}){
-#        if (ref($value) eq 'HASH'){ print "wkfndfkhvbkh";}       
-        my $values = $request->{ $self->name };
-        if (! $values){
-           $values = $self->default;
+    } else {    
+        while ( my( $key,$value) = each %{$self->options}){
+    #        if (ref($value) eq 'HASH'){ print "wkfndfkhvbkh";}       
+            my $values = $request->{ $self->name };
+            if (! $values){
+               $values = $self->default;
+            }
+    
+            $values = [ $values ] unless ref( $values ) =~ /ARRAY/;
+            $checked='';
+            if ([ $values ]) { $checked=' checked ' if ( grep { $_ eq $value } @{ $values } ); }
+            $result.=$pre.'<input type="radio" '.$class.$checked.$disabled.$name.' value="'.$value.'">'.$key.$post;        
+            $result.='<input type="hidden" '.$name.' value="'.$value.'">' if (($disabled ne '')&& ( $checked ne ''));        
         }
-
-        $values = [ $values ] unless ref( $values ) =~ /ARRAY/;
-        $checked='';
-        if ([ $values ]) { $checked=' checked ' if ( grep { $_ eq $value } @{ $values } ); }
-        $result.=$pre.'<input type="radio" '.$class.$checked.$disabled.$name.' value="'.$value.'">'.$key.$post;        
-        $result.='<input type="hidden" '.$name.' value="'.$value.'">' if (($disabled ne '')&& ( $checked ne ''));
-        
     }
+    
+   }
+    if ($self->optionsnum){	    
+	    foreach (@{$self->optionsnum}){
+            while( my ($key, $value) = each %$_ ) {
+                      my $values = $request->{ $self->name };
+            if (! $values){
+               $values = $self->default;
+            }
+            if($self->labelclass){
+                $key='<div class="'.$self->labelclass.'">'.$key.'</div>';
+            }
+            
+            my $keyr=$key;            
+            my $keyl='';
+            if ($self->position){
+                if ($self->position=='left') {                    
+                    $keyl=$key;
+                    $keyr='';
+                }
+            }   
+    
+            $values = [ $values ] unless ref( $values ) =~ /ARRAY/;
+            $checked='';
+            if ([ $values ]) { $checked=' checked ' if ( grep { $_ eq $value } @{ $values } ); }
+            $result.=$pre.$keyl.'<input type="radio" '.$class.$checked.$disabled.$name.' value="'.$value.'">'.$keyr.$post;        
+            $result.='<input type="hidden" '.$name.' value="'.$value.'">' if (($disabled ne '')&& ( $checked ne ''));   
+            }
+        }
     }
 
    $result.=$after;

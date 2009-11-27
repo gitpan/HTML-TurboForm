@@ -48,14 +48,20 @@ sub render{
 		    my $values = $request->{ $self->name };
 		    $values = [ $values ] unless ref( $values ) =~ /ARRAY/;
 		    $checked='';
-		    if ( @{ $values } && $value) {
-			if ( grep { $_ eq $value } @{ $values } ){ $checked=' selected '; }
+		    if ( @{ $values } && $value) {				
+			    if ( grep { $_ eq $value if ($_) } @{ $values } ){ $checked=' selected '; }				
 		    }
-		    if ($value ne $self->first){
-			$optiontags.='<option '.$checked.' value="'.$value.'">'.$key.'</option>';
-		    } else {
-			$first =  '<option '.$checked.' value="'.$value.'">'.$key.'</option>';
-		    }
+		
+		    if ($self->first) {
+				if ($value ne $self->first){
+					$optiontags.='<option '.$checked.' value="'.$value.'">'.$key.'</option>';
+				} else {
+					$first =  '<option '.$checked.' value="'.$value.'">'.$key.'</option>';
+				}
+			} else  {
+                $optiontags.='<option '.$checked.' value="'.$value.'">'.$key.'</option>';
+			}
+			
 		    $result2.='<input type="hidden" '.$id.$name.' value="'.$value.'">' if (($disabled ne '')&& ( $checked ne ''));
 		}
 	    }
