@@ -18,8 +18,9 @@ sub render{
 
     my $name=' name="'.$self->name.'" ';
     my $checked='';
-
-    $disabled=' disabled ' if ($options->{frozen} == 1) ;
+    if ($options->{frozen}){
+        $disabled=' disabled ' if ($options->{frozen} == 1) ;
+    }
     my $pre='';
     my $post='';
     my $after='';

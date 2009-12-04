@@ -19,8 +19,7 @@ sub render{
     my $aha=$self->options;
     my $name=' name="'.$self->name.'" ';
     my $checked='';
-
-    $disabled=' disabled ' if ($options->{frozen} == 1) ;
+    if ($options->{frozen}){ $disabled=' disabled ' if ($options->{frozen} == 1) ; }
 
     my $pre='';
     my $post='';
@@ -91,7 +90,7 @@ sub render{
             my $keyr=$key;            
             my $keyl='';
             if ($self->position){
-                if ($self->position=='left') {                    
+                if ($self->position eq 'left') {                    
                     $keyl=$key;
                     $keyr='';
                 }
@@ -99,7 +98,9 @@ sub render{
     
             $values = [ $values ] unless ref( $values ) =~ /ARRAY/;
             $checked='';
-            if ([ $values ]) { $checked=' checked ' if ( grep { $_ eq $value } @{ $values } ); }
+            
+            if ([ $values ]) { $checked=' checked ' if ( grep { $_ eq $value if ($_) } @{ $values } ); }
+            
             $result.=$pre.$keyl.'<input type="radio" '.$class.$checked.$disabled.$name.' value="'.$value.'">'.$keyr.$post;        
             $result.='<input type="hidden" '.$name.' value="'.$value.'">' if (($disabled ne '')&& ( $checked ne ''));   
             }
