@@ -4,7 +4,7 @@ use strict;
 use warnings;
 use UNIVERSAL::require;
 use YAML::Syck;
-our $VERSION='0.62';
+our $VERSION='0.622';
 
 use File::Copy;
 
@@ -234,8 +234,8 @@ sub add_element{
       my $tlabel2=$params->{label2};
       my $tname=$name."_input";
       my $tname2=$name."_input2";
-      $self->add_element({ type => 'Text',  name => $tname } );
-      $self->add_element({ type => 'Text',  name => $tname2, class=>"form_input2" } );
+      $self->add_element({ type => 'Text',  name => $tname, label=> $tlabel } );
+      $self->add_element({ type => 'Text',  name => $tname2, class=>"form_input2", label=> $tlabel2 } );
       my $c_val = $self->get_value($tname2);
       
       #use Data::Dumper;
