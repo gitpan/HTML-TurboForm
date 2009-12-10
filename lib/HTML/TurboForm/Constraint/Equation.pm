@@ -14,15 +14,20 @@ sub check{
   $op=          $self->operator;
   $comp_val =   $self->comp ;
 
+print STDERR $val."   --    ".$comp_val."\n";
+
   if (($op eq "eq") or ($op eq "ne")) {
+    if (($val)&&($comp_val)){
     $val="'$val'";
     $comp_val="'$comp_val'";
+    }
   }
 
   if ($val and $op and $comp_val ){
     my $equation=$val." ".$op." ".$comp_val ;
     return 1 if( eval($equation) );
   }
+    
   return 0;  
 }
 

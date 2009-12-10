@@ -21,6 +21,7 @@ lib/HTML/TurboForm/Constraint/Email.pm
 lib/HTML/TurboForm/Constraint/Equation.pm
 lib/HTML/TurboForm/Constraint/Length.pm
 lib/HTML/TurboForm/Constraint/Regex.pm
+lib/HTML/TurboForm/Constraint/Mintime.pm
 lib/HTML/TurboForm/Constraint/Required.pm
 lib/HTML/TurboForm/Element.pm
 lib/HTML/TurboForm/Element/Captcha.pm

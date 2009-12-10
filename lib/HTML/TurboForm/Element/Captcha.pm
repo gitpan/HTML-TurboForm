@@ -35,15 +35,20 @@ sub render {
   $k=$self->keyname if ($self->keyname);  
   
   $result=$self->print_number($random);
+  my $crypt = Crypt::Lite->new( debug => 0, encoding => 'hex8' );
   
-  if ($self->keyphrase){
-      my $crypt = Crypt::Lite->new( debug => 0, encoding => 'hex8' );
+  if ($self->keyphrase){      
 	  $random=$crypt->encrypt($random,$self->keyphrase);      
   }
   
+  my $tstamp=time();
+  $tstamp=$crypt->encrypt($tstamp,$self->keyphrase);
+  
   if ($self->session && $self->name){
     $self->session->{ $self->name.$k}=$random;
+    $self->session->{ $self->name.$k.'2'}=$tstamp;
   }
+  
   $self->{value}=$random;
  # $result .='<input class="form_std" type="'.$self->type.'"'.$disabled.$name.$class.$value.'>' ;
   return $self->vor($options).$result.$self->nach;

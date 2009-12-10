@@ -4,7 +4,7 @@ use strict;
 use warnings;
 use UNIVERSAL::require;
 use YAML::Syck;
-our $VERSION='0.61';
+our $VERSION='0.62';
 
 use File::Copy;
 
@@ -195,8 +195,6 @@ sub add_element{
   }
 
   if (($params->{type} eq 'Image')||($params->{type} eq 'Upload')) {
-    
-    
     if ( exists $self->{request}->{$name.'_submit' } ){
       $self->{submitted}=1 ;
       $self->{submit_value} = $namew.'_uploaded';
@@ -231,14 +229,20 @@ sub add_element{
     }
   }
 
-  if ($params->{type} eq 'Captcha') {
+  if ($params->{type} eq 'Captcha') {      
+      my $tlabel=$params->{label1};
+      my $tlabel2=$params->{label2};
       my $tname=$name."_input";
       my $tname2=$name."_input2";
-      my $c_val = $self->get_value($name);
       $self->add_element({ type => 'Text',  name => $tname } );
       $self->add_element({ type => 'Text',  name => $tname2, class=>"form_input2" } );
+      my $c_val = $self->get_value($tname2);
+      
+      #use Data::Dumper;
+      #print STDERR Dumper($params);
       $self->add_constraint({ type=> 'Equation', operator=>'eq', name=>$tname, comp=>$c_val, text=>$params->{message} });
-      $self->add_constraint({ type=> 'Equation', operator=>'eq', name=>$tname2, comp=>'', text=>$params->{message} });
+      #$self->add_constraint({ type=> 'Equation', operator=>'eq', name=>$tname2, comp=>'', text=>$params->{message} });      
+      $self->add_constraint({ type=> 'Mintime', name=>$tname, keyname=> $params->{keyname}."2", keyphrase=>$params->{keyphrase} ,session=> $params->{session} , text=>'Error, please wait 5 Seconds and resubmit the form.' });                      
   }
 }
 
