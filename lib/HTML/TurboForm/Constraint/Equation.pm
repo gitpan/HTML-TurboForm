@@ -14,8 +14,6 @@ sub check{
   $op=          $self->operator;
   $comp_val =   $self->comp ;
 
-print STDERR $val."   --    ".$comp_val."\n";
-
   if (($op eq "eq") or ($op eq "ne")) {
     if (($val)&&($comp_val)){
     $val="'$val'";

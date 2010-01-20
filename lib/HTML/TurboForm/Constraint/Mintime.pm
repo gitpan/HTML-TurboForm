@@ -22,7 +22,7 @@ sub check{
       $t=$crypt->decrypt($t,$self->keyphrase);
   }
   
-  $result=1 if (($time-$mintime)>$t);
+  $result=1 if (($time-$mintime) > $t);
   return $result;
 }
 

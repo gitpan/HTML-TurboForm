@@ -37,11 +37,11 @@ sub render {
 
 
 sub get_value{
-    my ($self) = @_;
-     
+    my ($self) = @_;     
     my $result='';
     $result=$self->{request}->{$self->name} if exists($self->{request}->{$self->name});
-    return sha1_hex($result);
+    return sha1_hex($result) if ($result);
+    return '' if (!$result);
 }
 
 1;
