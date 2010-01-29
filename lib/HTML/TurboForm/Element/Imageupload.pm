@@ -5,7 +5,7 @@ use base qw(HTML::TurboForm::Element);
 use Imager;
 use File::Finder;
 
-__PACKAGE__->mk_accessors( qw/ prev upload keeporiginal filename width height savedir thumbnail loadurl caption maxsize errormessage / );
+__PACKAGE__->mk_accessors( qw/ prev upload keeporiginal scaletype filename width height savedir thumbnail loadurl caption maxsize errormessage / );
 
 sub new{
     my ($class, $request, $upload) = @_;
@@ -58,20 +58,47 @@ sub do_img{
                     if ($self->keeporiginal){
                         $self->upload->copy_to($self->keeporiginal.'/orig_'.$pic);
                     }
-
+                
                     # if there is a save dir, resize. depending if width and/or height is given, scale to dimensions
                     if ($self->savedir){
-                        if (($self->width) and ($self->height)) {
-                            # No scale. Resize to given dimensions
-                            $image = $image->scaleX(pixels=>$self->width)->scaleY(pixels=>$self->height);
-                        } elsif ($self->width) {
-                            # Resize width, scale height
-                            $image = $image->scale(xpixels=>$self->width);
-                        } elsif ($self->height) {
-                            # Resize height, scale width
-                            $image = $image->scale(ypixels=>$self->height);
+                         my $continueflag=1;
+                         if ($self->scaletype eq 'smart'){                            
+                            if ($self->width && $self->height){
+                                $continueflag = 0;
+                                my $container_dir='v';
+                                if ($self->width > $self->height){
+                                    my $container_dir='h';
+                                }
+                                
+                                my $dir='v';
+                                if ($image->getwidth() > $image->getheight()){
+                                    $dir='h';
+                                }
+                                                        
+                                if ($container_dir ne $dir ){
+                                    my $tmp=$self->width;
+                                    $self->width=$self->height;
+                                    $self->height=$tmp;
+                                }
+                                
+                                $image = $image->scale(ypixels=>$self->height,xpixels=>$self->width);
+                            }
                         }
-                
+                        if ($continueflag==1){  
+                            if  (($self->width) and ($self->height) and ($self->scaletype)) {
+                                # Resize height, scale width
+                                $image = $image->scale(ypixels=>$self->height,xpixels=>$self->width,type=>$self->scaletype);
+                            } elsif (($self->width) and ($self->height)) {
+                                # No scale. Resize to given dimensions
+                                $image = $image->scaleX(pixels=>$self->width)->scaleY(pixels=>$self->height);
+                            } elsif ($self->width) {
+                                # Resize width, scale height
+                                $image = $image->scale(xpixels=>$self->width);
+                            } elsif ($self->height) {
+                                # Resize height, scale width
+                                $image = $image->scale(ypixels=>$self->height);
+                            } 
+                        }
                             $image->write(
                                 file        => $self->savedir.'/med_'.$pic,
                                 type        => 'jpeg',
