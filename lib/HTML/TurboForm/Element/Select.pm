@@ -60,8 +60,7 @@ sub render{
 				}
 			} else  {
                 $optiontags.='<option '.$checked.' value="'.$value.'">'.$key.'</option>';
-			}
-			
+			}			
 		    $result2.='<input type="hidden" '.$id.$name.' value="'.$value.'">' if (($disabled ne '')&& ( $checked ne ''));
 		}
 	    }

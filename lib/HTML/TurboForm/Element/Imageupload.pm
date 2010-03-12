@@ -31,7 +31,6 @@ sub do_img{
     my $request=$self->request;
     my $pic='';
     $pic = $self->request->{$self->name} if ($self->request->{$self->name} );
-
    if ($request->{ $self->name.'_upload' }) {
 
         if( $self->upload->type !~ /^image\/(jpeg|jpg|gif|png|pjpeg)$/ ) {

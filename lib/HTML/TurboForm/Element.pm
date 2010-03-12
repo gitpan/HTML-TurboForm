@@ -169,8 +169,10 @@ sub vor{
 
     if ($self->wrapper){
 		my $wrap=$self->wrapper;
-		my $s=$self->label;
-		$wrap=~s/<label>/$s/g;
+		my $s='';
+		$s=$self->label if (!$s);		
+		$wrap=~s/<label>/$s/g;		
+		$wrap=~s/<error>//g if (!$error);
 		$wrap=~s/<error>/$error/g if ($error ne '');
 		my $pos=index($wrap,'<element>');
 		$result=substr($wrap,0,$pos);
@@ -186,6 +188,7 @@ sub nach{
     return "" if ($self->pure );
     my $result= "</div></div>";
     my $table='';
+	$result='' if ($self->wrapper);
 
     $result="</div>" if ($self->type eq "Html");
     $result="</td></tr>"  if ($self->{view} eq 'table');
