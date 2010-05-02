@@ -4,7 +4,7 @@ use strict;
 use warnings;
 use UNIVERSAL::require;
 use YAML::Syck;
-our $VERSION='0.625';
+our $VERSION='0.627';
 
 use File::Copy;
 
@@ -475,6 +475,7 @@ sub get_r{
 }
 sub get_e{
   my ($self, $name)=@_;
+  
   return '' if (!$self->{element_index}->{$self->{prefix}.$name}->{error_message});
   return $self->{element_index}->{$self->{prefix}.$name}->{error_message};
 }

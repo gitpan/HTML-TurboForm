@@ -26,6 +26,18 @@ sub ren{
     rename($self->savedir.'/med_'.$file, $self->savedir.'/'.$newfilename.'.jpg');    
 }
 
+sub ren_thumb{
+    my ($self, $newfilename)=@_;
+    my $file='';
+    my $request=$self->request;
+    $file=$self->{pic};
+    if (!$self->{pic}){
+         $file=$request->{$self->name} if ($request->{$self->name});
+    }       
+    rename($self->thumbnail->{savedir}.'/thumb_'.$file, $self->thumbnail->{savedir}.'/'.$newfilename.'.jpg');    
+}
+
+
 sub do_img{
     my ($self)=@_;
     my $request=$self->request;

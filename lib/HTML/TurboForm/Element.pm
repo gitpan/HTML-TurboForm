@@ -3,7 +3,7 @@ package HTML::TurboForm::Element;
 use warnings;
 use strict;
 use base qw/ Class::Accessor /;
-__PACKAGE__->mk_accessors( qw/ params submit wrapper pure default dbsearchfield dbdata dbop dbid dblabel ignore_dbix type id name label text value request options optionsnum class left_class limit right_class row_class attributes table submit columns / );
+__PACKAGE__->mk_accessors( qw/ params submit wrapper errorclass pure default dbsearchfield dbdata dbop dbid dblabel ignore_dbix type id name label text value request options optionsnum class left_class limit right_class row_class attributes table submit columns / );
 
 sub new{
     my ($class, $request) = @_;
@@ -123,7 +123,8 @@ sub vor{
     my $rtc='';
     my $ltc='';
     my $class='class="form_row"';
-
+    my $errorclass=" ".$self->errorclass if ($self->errorclass);
+	
     if ($self->{class}) {       $class='class="'.$self->{class}.'"'; }
     if ($self->{row_class}) {   $rwc  = " class='".$self->{row_class}."' ";  }
     if ($self->{right_class}) { $rtc  = " class='".$self->{right_class}."' "; }
@@ -135,7 +136,7 @@ sub vor{
         $self->label('') if (!$self->label);
         $result=$table."<div ".$class.$rwc.">".$error.
                        "<div class='form_left'".$ltc.">".$self->label."</div>".
-                       "<div class='form_right'".$rtc.">";
+                       "<div class='form_right".$errorclass."'".$rtc.">";
 		       
 #$result=$table."<div ".$class.$rwc.">".$error.
 #                       "<div class='form_left'".$ltc.">".$self->label."</div>".

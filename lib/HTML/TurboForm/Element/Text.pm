@@ -15,7 +15,11 @@ sub render {
   my $disabled='';
   my $class='form_text';
   $class = $self->class if ($self->class);
-  $class = 'class="'.$class.'"';
+  
+  
+  
+  $class = 'class="'.$class.'"';  
+  
   my $name=' name="'.$self->name.'" ';
   my $value='';
   $value=' value="'.$request->{ $self->name }.'" ' if ($request->{ $self->name });
