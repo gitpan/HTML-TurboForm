@@ -13,7 +13,12 @@ sub render{
     my $disabled='';
     my $class='form_radio';
 
-    $self->label('&nbsp;') if ($self->label eq '');
+    if ($self->label) {
+       $self->label('&nbsp;') if ($self->label eq '');
+	} else {
+		$self->label('&nbsp;');
+	}
+	
     $class=$self->{class}  if exists($self->{class});
     $class=' class="'.$class.'" ';
     my $aha=$self->options;

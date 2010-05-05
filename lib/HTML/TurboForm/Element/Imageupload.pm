@@ -172,12 +172,21 @@ sub render{
     my $pic='';
     $pic= $self->{pic} if ($self->{pic});
     $pic=$request->{$self->name} if ($request->{$self->name});
-    $disabled=' disabled ' if ($options->{frozen} == 1);
-    if ($options->{frozen} != 1 ){
-        $result.= $self->errormessage if ($self->{sizeerror} && $self->errormessage);
-        $result.='<input type="file" class="'.$class.'" '.$self->get_attr().$disabled.$name.'>';
-        #$result.='<input type="submit" class="form_image_submit" value="'.$self->caption.'" name="'.$self->name.'_submit">';
+    
+    if ($options->{frozen}) {    
+        $disabled=' disabled ' if ($options->{frozen} == 1);
     }
+    
+    my $tmpres='';    
+    $tmpres.= $self->errormessage if ($self->{sizeerror} && $self->errormessage);
+    $tmpres.='<input type="file" class="'.$class.'" '.$self->get_attr().$disabled.$name.'>';
+    
+    if ($options->{frozen}) {    
+        $result .= $tmpres unless ($options->{frozen} == 1 );
+    } else {
+        $result .= $tmpres;
+    }
+    
     $result.='<input type="hidden" name="'.$self->name.'" value="'.$pic.'">';
     if ($pic ne ''){        
         $result.="<br /><br />";        

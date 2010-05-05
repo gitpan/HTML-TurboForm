@@ -4,7 +4,7 @@ use strict;
 use warnings;
 use UNIVERSAL::require;
 use YAML::Syck;
-our $VERSION='0.627';
+our $VERSION='0.628';
 
 use File::Copy;
 
