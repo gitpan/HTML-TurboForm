@@ -7,11 +7,12 @@ __PACKAGE__->mk_accessors( qw/ params submit wrapper errorclass pure default dbs
 
 sub new{
     my ($class, $request) = @_;
+	
     my $self = $class->SUPER::new( $request );
     $self->{view} ='';
     $self->{submitted} = 0;
     $self->{submitted} = 1 if ($request->{ $self->name });
-
+	
     if ($self->dbdata and $self->dbid and $self->dblabel){
        my @t = @{ $self->dbdata };
        foreach (@t){

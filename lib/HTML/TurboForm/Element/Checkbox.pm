@@ -12,7 +12,10 @@ sub render{
     my $class='';
     my $request=$self->request;
 
+    
+    if (!$self->label){ $self->label(''); }
     $self->label('&nbsp;') if ($self->label eq '');
+    
 
     $class=' class="'.$self->{class}.'" '  if exists($self->{class});
 
@@ -25,6 +28,7 @@ sub render{
     my $post='';
     my $after='';
 
+    $self->listmode('') if (!$self->listmode);
     if ( $self->listmode ne '' ){
         $result.='<ul>';
         $pre='<li>';
