@@ -56,7 +56,7 @@ sub render{
 
          $values = [ $values ] unless ref( $values ) =~ /ARRAY/;
          $checked='';
-         if ([ $values ]) { $checked=' checked ' if ( grep { $_ eq $value } @{ $values } ); }
+         if ([ $values ]) { $checked=' checked="true" ' if ( grep { $_ eq $value } @{ $values } ); }
          my $special='';
          #$special='<input type="text" '.$name.'>' if ($self->special==$k2);
          $result.=$pre.'<input type="radio" '.$class.$checked.$disabled.$name.' value="'.$value.'">'.$key.$special.$post;

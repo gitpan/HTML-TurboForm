@@ -90,8 +90,7 @@ sub do_img{
                                     my $tmp=$self->width;
                                     $self->width=$self->height;
                                     $self->height=$tmp;
-                                }
-                                
+                                }                                
                                 $image = $image->scale(ypixels=>$self->height,xpixels=>$self->width);
                             }
                         }

@@ -4,7 +4,7 @@ use strict;
 use warnings;
 use UNIVERSAL::require;
 use YAML::Syck;
-our $VERSION='0.630';
+our $VERSION='0.632';
 
 use File::Copy;
 
@@ -507,7 +507,12 @@ sub unfreeze{
 sub get_value{
   my ($self, $name)=@_;
   my $result='';
-  $result=$self->{element}[$self->{element_index}->{$self->{prefix}.$name}->{index}]->get_value();
+  
+  if (!$self->{request}->{$self->{prefix}.$name}){
+  } else {          
+      $result=$self->{element}[$self->{element_index}->{$self->{prefix}.$name}->{index}]->get_value();
+  }
+  
   return $result;
 }
 
