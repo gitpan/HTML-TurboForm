@@ -2,7 +2,7 @@ package HTML::TurboForm::Element::Upload;
 use warnings;
 use strict;
 use base qw(HTML::TurboForm::Element);
-use File::Copy;
+use File::Copy "mv";
 use File::Path;
 __PACKAGE__->mk_accessors( qw/ prev upload maxsize keeporiginal savedir loadurl filedir caption overwrite errormessage / );
 
@@ -22,8 +22,8 @@ sub new{
     if ($self->request->{ $self->name.'_upload' }) {
         if ((-e $self->savedir.'/'.$self->filedir.$self->upload->basename)&&(!$self->overwrite)){
             $pic='ERROR';
-        } else {            
-            move($self->upload->tempname,$self->savedir.'/'.$self->filedir.$self->upload->basename);
+        } else {         
+            mv($self->upload->tempname,$self->savedir.'/'.$self->filedir.$self->upload->basename);
             $pic = $self->savedir.'/'.$self->upload->basename;
         }
     }
