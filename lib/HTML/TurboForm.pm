@@ -4,7 +4,7 @@ use strict;
 use warnings;
 use UNIVERSAL::require;
 use YAML::Syck;
-our $VERSION='0.633';
+our $VERSION='0.634';
 
 use File::Copy;
 
@@ -511,14 +511,15 @@ sub get_value{
   if (!$self->{request}->{$self->{prefix}.$name}){
   } else {          
       $result=$self->{element}[$self->{element_index}->{$self->{prefix}.$name}->{index}]->get_value();
-  }
-  
+  }  
   return $result;
 }
 
 sub populate{
   my ($self, $data, $anyway)=@_;
-
+  
+  $self->{submit_value}='' unless ($self->{submit_value});
+  
   if (($self->{submit_value} eq '') or ($anyway ne '')) {
     if (ref($data) eq 'HASH') {
       while (my ($key, $value) = each %{ $data }){

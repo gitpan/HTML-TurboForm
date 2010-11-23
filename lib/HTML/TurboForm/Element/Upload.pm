@@ -35,9 +35,9 @@ sub new{
 sub get_value{
     my ($self) = @_;
     my $result='';
-     my $request=$self->request;
+    my $request=$self->request;
     $result=$self->{pic} if ($self->{pic});
-   if (!$self->{pic}){
+    if (!$self->{pic}){
          $result=$request->{$self->name} if ($request->{$self->name});
     }
     return $result;

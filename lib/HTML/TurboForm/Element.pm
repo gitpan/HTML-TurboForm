@@ -3,7 +3,7 @@ package HTML::TurboForm::Element;
 use warnings;
 use strict;
 use base qw/ Class::Accessor /;
-__PACKAGE__->mk_accessors( qw/ params submit wrapper errorclass pure default dbsearchfield dbdata dbop dbid dblabel ignore_dbix type id name label text value request options optionsnum class left_class limit right_class row_class attributes table submit columns / );
+__PACKAGE__->mk_accessors( qw/ params submit wrapper errorclass pure default dbsearchfield dbdata optionstext dbop dbid dblabel ignore_dbix type id name label text value request options optionsnum class left_class limit right_class row_class attributes table submit columns / );
 
 sub new{
     my ($class, $request) = @_;

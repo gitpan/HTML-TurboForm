@@ -2,7 +2,7 @@ package HTML::TurboForm::Element::Select;
 use warnings;
 use strict;
 use base qw(HTML::TurboForm::Element);
-__PACKAGE__->mk_accessors( qw/ default first / );
+__PACKAGE__->mk_accessors( qw/ default first optionstext/ );
 
 sub render{
     my ($self, $options, $view)=@_;
@@ -38,9 +38,20 @@ sub render{
 
     $result.='<select class="'.$class.'" '.$self->get_attr().$disabled.$id.$name.'>';
     my $result2='';
-    if (($self->options)or ($self->optionsnum)){
+    if (($self->options)or ($self->optionsnum)or ($self->optionstext)){
         my $optiontags ='';
 	my $first = '';
+	
+	if ($self->optionstext){
+		my $values = $request->{ $self->name };
+		
+		$values = [ $values ] unless ref( $values ) =~ /ARRAY/;
+		$checked='';		
+		$optiontags=$self->optionstext;#'<option '.$checked.' value="'.$value.'">'.$key.'</option>';		
+		foreach ($values){ $optiontags=~s/ value=\"$_\" /checked value=\"$_\"/g; }
+		
+		#$result2.='<input type="hidden" '.$id.$name.' value="'.$value.'">' if (($disabled ne '')&& ( $checked ne ''));
+	}
 	    
 	if ($self->optionsnum){	    
 	    foreach (@{$self->optionsnum}){
