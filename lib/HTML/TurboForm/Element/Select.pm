@@ -40,16 +40,16 @@ sub render{
     my $result2='';
     if (($self->options)or ($self->optionsnum)or ($self->optionstext)){
         my $optiontags ='';
-	my $first = '';
+	    my $first = '';
 	
 	if ($self->optionstext){
-		my $values = $request->{ $self->name };
-		
+		my $values = $request->{ $self->name };		
 		$values = [ $values ] unless ref( $values ) =~ /ARRAY/;
-		$checked='';		
-		$optiontags=$self->optionstext;#'<option '.$checked.' value="'.$value.'">'.$key.'</option>';		
-		foreach ($values){ $optiontags=~s/ value=\"$_\" /checked value=\"$_\"/g; }
 		
+		$checked='';		
+		$optiontags=$self->optionstext;
+		my $tmptext=$optiontags;
+		foreach (@{$values}){ $optiontags=~s/$_\"/$_\" selected /g if ($_); }
 		#$result2.='<input type="hidden" '.$id.$name.' value="'.$value.'">' if (($disabled ne '')&& ( $checked ne ''));
 	}
 	    
@@ -114,6 +114,8 @@ sub get_value{
     $result='' if ($result eq '-1');
     return $result;
 }
+
+
 
 1;
 
