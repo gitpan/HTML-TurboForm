@@ -99,7 +99,9 @@ sub render{
 
 sub get_value{
     my ($self) = @_;
-    my $result='';        
+    my $result='';
+    
+    
     if ($self->{request}->{$self->name.'_day'}) {        
         $result=$self->{request}->{$self->name.'_year'}.'-'.
         $self->{request}->{$self->name.'_month'}.'-'.

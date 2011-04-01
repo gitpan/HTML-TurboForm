@@ -49,7 +49,7 @@ sub render{
 		$checked='';		
 		$optiontags=$self->optionstext;
 		my $tmptext=$optiontags;
-		foreach (@{$values}){ $optiontags=~s/$_\"/$_\" selected /g if ($_); }
+		foreach (@{$values}){ $optiontags=~s/value=\"$_\"/value=\"$_\" selected /g if ($_); }		
 		#$result2.='<input type="hidden" '.$id.$name.' value="'.$value.'">' if (($disabled ne '')&& ( $checked ne ''));
 	}
 	    

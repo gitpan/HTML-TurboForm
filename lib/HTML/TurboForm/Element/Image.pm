@@ -99,8 +99,10 @@ sub get_value{
     my $request=$self->request;
     $result=$self->{pic};
     if (!$self->{pic}){
-         $result=$request->{$self->name} if ($request->{$self->name});
-    }
+         if ($request->{$self->name}){
+             $result=$request->{$self->name};
+         } 
+    }    
     return $result;
 }
 

@@ -11,7 +11,8 @@ sub new{
     my ($class, $request, $upload) = @_;
     my $self = $class->SUPER::new( $request );
     $self->upload( $upload );
-    $self->do_img();
+    $self->{pic}='';
+    $self->do_img(); 
     return $self;
 }
 
@@ -139,6 +140,7 @@ sub do_img{
                             }
                         }
                         unlink($self->savedir.'/'.$pic);
+                        #$self->{pic}=$pic;
                      }
                 }
             }
@@ -150,6 +152,7 @@ sub get_value{
     my ($self) = @_;
     my $result='';
     my $request=$self->request;
+    
     $result=$self->{pic};
     if (!$self->{pic}){
          $result=$request->{$self->name} if ($request->{$self->name});
