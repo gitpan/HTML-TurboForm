@@ -50,7 +50,6 @@ sub init{
 
 sub add_options{
    my ($self, $opt) = @_;
-
    $self->{options} = $opt;
 }
 

@@ -49,9 +49,10 @@ sub render{
             $result.="</td>\n<td>";
             $counter = 0;
         }
-
+        
         my $values = $request->{ $self->name };
         $values = [ $values ] unless ref( $values ) =~ /ARRAY/;
+        
         $checked='';
         if ([ $values]){ $checked=' checked ' if ( grep { $_ eq $value if ($_) } @{ $values } ); }
         

@@ -4,7 +4,7 @@ use strict;
 use warnings;
 use UNIVERSAL::require;
 use YAML::Syck;
-our $VERSION='0.66';
+our $VERSION='0.67';
 
 use File::Copy;
 
@@ -454,12 +454,25 @@ sub get_dbix{
 
 sub add_options{
   my ($self,$name,$options)=@_;
-  $self->{element}[$self->{element_index}->{$self->{prefix}.$name}->{index}]->add_options($options);
+  $self->{prefix}='' if (!$self->{prefix});
+  if ($name && $name ne ''){
+     if ($self->{element_index}->{$self->{prefix}.$name }){      
+        $self->{element}[$self->{element_index}->{$self->{prefix}.$name}->{index}]->add_options($options);
+     }
+  }
 }
 
 sub reset_options{
   my ($self,$name,$options,$label,$id)=@_;
-  $self->{element}[$self->{element_index}->{$self->{prefix}.$name}->{index}]->reset_options($options,$label,$id);
+  
+  $self->{prefix}='' if (!$self->{prefix});
+  if ($name && $name ne ''){
+     if ($self->{element_index}->{$self->{prefix}.$name }){      
+        my $element=$self->{element}[ $self->{element_index}->{ $self->{prefix}.$name }->{index}
+        ];      
+      $element->reset_options($options,$label,$id) if ($element && $options && $label && $id);
+      }
+  }  
 }
 
 sub freeze{
