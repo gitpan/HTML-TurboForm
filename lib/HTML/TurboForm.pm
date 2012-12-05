@@ -4,7 +4,7 @@ use strict;
 use warnings;
 use UNIVERSAL::require;
 use YAML::Syck;
-our $VERSION='0.67';
+our $VERSION='0.68';
 
 use File::Copy;
 
@@ -521,9 +521,9 @@ sub get_value{
   my ($self, $name)=@_;
   my $result='';
   
-  if (($self->{request}->{$self->{prefix}.$name}) ||($self->{request}->{$self->{prefix}.$name.'_submit'})){  
+  #if (($self->{request}->{$self->{prefix}.$name}) ||($self->{request}->{$self->{prefix}.$name.'_submit'})){  
       $result=$self->{element}[$self->{element_index}->{$self->{prefix}.$name}->{index}]->get_value();
-  }  
+  #}  
   return $result;
 }
 

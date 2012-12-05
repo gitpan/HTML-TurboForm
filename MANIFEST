@@ -36,6 +36,7 @@ lib/HTML/TurboForm/Element/Imageslider.pm
 lib/HTML/TurboForm/Element/Radio.pm
 lib/HTML/TurboForm/Element/Range.pm
 lib/HTML/TurboForm/Element/Select.pm
+lib/HTML/TurboForm/Element/Safety.pm
 lib/HTML/TurboForm/Element/Password.pm
 lib/HTML/TurboForm/Element/Slider.pm
 lib/HTML/TurboForm/Element/Submit.pm
