@@ -8,27 +8,47 @@ __PACKAGE__->mk_accessors( qw/ class special listmode pre post position labelcla
 sub init{
     my ($self)=@_;
 
-    my @names_o=('ape','dog','cat','unicorn','ant','bat','cow','fly','emu','gar','goose','koala','liger','otter','olm','moose','pig','pug','rat','snail');
-    my @names_e=('lion','bird','donkey','dragon','wale','bear','dodo','fish','frog','goat','hare','kiwi','kudu','ibis','mole','newt','pike','puma','seal','tang');   
-    my @possible_values=('1942','megatron','yellow','withbluespots','breathing','something','rogueninja','profx');
+    my @prefixes=('form_','e_','formmail_','mailer_','m_','fm_','f_','i_','input_','email_');
+    my @names_o=('realname','firstname','surname','state','workphone','zipcode','country','website','address','workaddress','homeaddress');
+    my @names_e=('name','cell','workcell','work','home','province','postalcode','city','shippingcity','shipping','comments','lastname','county');      
+    my @possible_values=('6049297969','1283 West Cordova Street','Canada','Quam','Viet Naam','Bruce Lee','Earl','brandon','lee','ninja','hanzo','7788342901','934 north cordova road','xiuIUvuicv998');
 
+    $self->{prefixes}=[@prefixes];    
     $self->{names_o}=[@names_o];
     $self->{names_e}=[@names_e];
     $self->{p_v}=[@possible_values];
     my $n_e;
     my $n_o;
+    my $c_pre_e;
+    my $c_pre_o;
+    while ( my ($k, $v) = each($self->{request}) ) {
+        foreach(@prefixes){
+            my $current_prefix=$_;
+            if ($k=~/^$_/g){
+                $k=~s/$_//g;                
+                foreach(@names_e){
+                    if ($_ eq $k){                        
+                        $n_e=$_;
+                        $c_pre_e=$current_prefix;
+                    }                    
+                }
+                foreach(@names_o){                    
+                    if ($_ eq $k){
+                        $n_o=$_;
+                        $c_pre_o=$current_prefix;
+                    }
+                }
+            }            
+        }       
+    }
     
-    while ( my ($k, $v) = each($self->{request}) ) {        
-        foreach(@names_e){  $n_e=$_ if ($_ eq $k); }
-        foreach(@names_o){  $n_o=$_ if ($_ eq $k); }
-    }    
     my $tmp=0;    
     if ($n_e){    
-        my $val=$self->{request}->{$n_e};
+        my $val=$self->{request}->{$c_pre_e.$n_e};
         foreach(@possible_values){ $tmp=1 if ($_ eq $val); }        
-    }    
+    }
     $self->{value}='spam';
-    $self->{value}='1' if ($n_o && $self->{request}->{$n_o} eq '' && $tmp==1);
+    $self->{value}='1' if ($n_o && !$self->{request}->{$c_pre_o.$n_o} && $tmp==1);
 }
 
 sub get_value{
@@ -44,12 +64,15 @@ sub render{
    my $result='';   
    my $name_o= $self->{names_o}[rand(scalar(@{ $self->{names_o}}))];
    my $name_e= $self->{names_e}[rand(scalar(@{ $self->{names_e}}))];
+   my $pre1= $self->{prefixes}[rand(scalar(@{ $self->{prefixes}}))];
+   my $pre2= $self->{prefixes}[rand(scalar(@{ $self->{prefixes}}))];   
+   
    my $rval= $self->{p_v}[rand(scalar(@{ $self->{p_v}}))];      
-   $result.='<div style="display: none">';
-   $result.='<input type="text" name="'.$name_o.'">';
-   $result.='<input type="text" name="'.$name_e.'">';
-   $result.='</div>';
-   $result.='<script>$("[name='.$name_e.']").attr("value","'.$rval.'");</script>';    
+   $result.='<div class="invisible">';
+   $result.='<input type="text" name="'.$pre1.$name_o.'">';
+   $result.='<input type="text" name="'.$pre2.$name_e.'">';
+   $result.='</div>';   
+   $result.='<script>$("[name='.$pre2.$name_e.']").attr("value","'.$rval.'");</script>';      
   return $result;
 }
 
