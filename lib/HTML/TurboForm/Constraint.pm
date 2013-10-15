@@ -42,6 +42,3 @@ returns error message of constraint
 Thorsten Domsch, tdomsch@gmx.de
 
 =cut
-
-
-
