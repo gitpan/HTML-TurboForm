@@ -4,10 +4,10 @@ use strict;
 use warnings;
 use UNIVERSAL::require;
 use YAML::Syck;
-our $VERSION='0.70';
-use try;
+our $VERSION='0.72';
+use Try::Tiny;
 use File::Copy;
-
+#
 sub new{
   my ($class, $r,$prefix)=@_;
   my $self = {};
@@ -521,9 +521,9 @@ sub get_value{
   my ($self, $name)=@_;
   my $result='';
   
-  
+  my $id='';
    try{
-       my $id=$self->{element_index}->{$self->{prefix}.$name}->{index};
+       $id=$self->{element_index}->{$self->{prefix}.$name}->{index};
    }
    
    $result=$self->{element}[$id]->get_value() if ($id);
