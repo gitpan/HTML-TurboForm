@@ -4,7 +4,7 @@ use strict;
 use warnings;
 use UNIVERSAL::require;
 use YAML::Syck;
-our $VERSION='0.72';
+our $VERSION='0.73';
 use Try::Tiny;
 use File::Copy;
 #
@@ -524,7 +524,7 @@ sub get_value{
   my $id='';
    try{
        $id=$self->{element_index}->{$self->{prefix}.$name}->{index};
-   }
+   };
    
    $result=$self->{element}[$id]->get_value() if ($id);
   
