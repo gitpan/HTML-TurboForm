@@ -4,13 +4,14 @@ use strict;
 use warnings;
 use UNIVERSAL::require;
 use YAML::Syck;
-our $VERSION='0.73';
+our $VERSION='0.74';
 use Try::Tiny;
 use File::Copy;
 #
 sub new{
   my ($class, $r,$prefix)=@_;
   my $self = {};
+  $r={} if (!$r);  
   $self->{request}= $r;
   $self->{submitted} = 0;
   $self->{after_upload}='';
