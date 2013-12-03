@@ -2,6 +2,7 @@ package HTML::TurboForm::Element;
 
 use warnings;
 use strict;
+use Scalar::MoreUtils qw(empty);
 use base qw/ Class::Accessor /;
 __PACKAGE__->mk_accessors( qw/ params submit wrapper errorclass pure default dbsearchfield dbdata optionstext dbop dbid dblabel ignore_dbix type id name label text value request options optionsnum class left_class limit right_class row_class attributes table submit columns / );
 
@@ -212,8 +213,8 @@ sub get_label{
 
 sub get_value{
     my ($self) = @_;
-    my $result='';
-    $result=$self->{request}->{$self->name} if exists($self->{request}->{$self->name});
+    my $result='';    
+    $result=$self->{request}->{$self->name} if (!empty($self->{request}->{$self->name}));    
     return $result;
 }
 

@@ -4,10 +4,10 @@ use strict;
 use warnings;
 use UNIVERSAL::require;
 use YAML::Syck;
-our $VERSION='0.74';
+our $VERSION='0.75';
 use Try::Tiny;
 use File::Copy;
-#
+
 sub new{
   my ($class, $r,$prefix)=@_;
   my $self = {};
@@ -22,8 +22,10 @@ sub new{
   $self->{prefix}='';
   $self->{row_wrapper}='';
   $self->{prefix}=$prefix if ($prefix);
-
+  
+  
   bless( $self, $class );
+  $self->add_element({type => 'Hidden', name => 'forminit1122013', value => '45B68E73A'});
   return $self;
 }
 
@@ -525,10 +527,9 @@ sub get_value{
   my $id='';
    try{
        $id=$self->{element_index}->{$self->{prefix}.$name}->{index};
-   };
-   
+   };   
    $result=$self->{element}[$id]->get_value() if ($id);
-  
+   
   return $result;
 }
 
@@ -581,7 +582,6 @@ sub map_value{
   }
  return $result;
 }
-
 
 sub get_values{
   my ($self)=@_;
